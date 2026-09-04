@@ -1,6 +1,10 @@
-# Referencias visuales — Proyecto "Landing personal"
+# Referencias visuales
 
-- Sitio de un estudio de diseño tipográfico, minimalismo, paleta de 2 colores — inspiración para la sección hero.
-- Serie de ilustraciones en collage digital de un artista independiente — inspiración para el fondo de la sección "Sobre mí".
-- Ejemplo de transición de scroll suave en un portafolio interactivo — para el paso entre secciones.
-- Paleta de una revista digital de arte generativo — referencia de contraste y jerarquía de color.
+Acá pego las referencias que voy juntando para un proyecto: una por línea, con una
+frase de qué me interesa de cada una. No hace falta ordenarlas — de eso se encarga
+la skill `catalogar-referencias`, que las agrupa por el elemento que inspiran
+(color, tipografía, layout, movimiento) y deja el resultado en `OUTPUT/`.
+
+Proyecto: _(pendiente)_
+
+- 

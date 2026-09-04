@@ -1,26 +1,19 @@
-# Fragmento de código con error — ejemplo para practicar
+# Fragmento de código con error
 
-Código (p5.js):
+Acá pego el código y el mensaje de error cuando quiero que el agente me lo explique.
+La skill `explicar-errores` lee este archivo si no pego el error directo en el chat.
 
-```js
-function setup() {
-  createCanvas(400, 400);
-}
-
-function draw() {
-  background(220);
-  fill(255, 0, 0);
-  circle(posX, posY, 50);
-}
-```
-
-Mensaje de error en consola:
+## Código
 
 ```
-Uncaught ReferenceError: posX is not defined
-    at draw (sketch.js:9)
+(pendiente)
 ```
 
-Contexto: el estudiante quería que el círculo se moviera con el mouse, pero nunca declaró
-`posX` ni `posY` — asumió que `mouseX`/`mouseY` se llamaban así porque las vio en un ejemplo
-de otro compañero.
+## Mensaje de error
+
+```
+(pendiente)
+```
+
+## Contexto
+Qué estaba intentando hacer y qué esperaba que pasara.
