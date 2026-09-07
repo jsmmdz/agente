@@ -3,9 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clase 1</title>
+  <title>Clase 1 — DOM y Grid</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    /* ==========================================
+       ESTADO 2 — Grid Básico (RESUELTO)
+       Los cuatro TODO, en el orden en que se pedían.
+    ========================================== */
+    .grid-container {
+
+      /* TODO 1 — activa Grid.
+         Sin esto, los .grid-item se apilan uno debajo del otro como
+         cualquier <div>: son elementos de bloque. `display: grid` cambia
+         cómo el contenedor acomoda a sus hijos, no cómo se ve él mismo. */
+      display: grid;
+
+      /* TODO 2 — tres columnas de 200px.
+         repeat(3, 200px) es exactamente lo mismo que escribir
+         "200px 200px 200px", solo que no se repite a mano.
+         Los 6 items no caben en 3 columnas, así que Grid crea una
+         segunda fila solo: quedan 3 + 3. */
+      grid-template-columns: repeat(3, 200px);
+
+      /* TODO 3 — espacio entre celdas.
+         gap separa por dentro del grid y no afecta el borde exterior.
+         Con margin en los items pasaría lo contrario: se sumaría también
+         contra el borde del contenedor, y habría que compensarlo. */
+      gap: 15px;
+
+      /* TODO 4 (opcional) — centra el contenido verticalmente.
+         Va en el contenedor porque es él quien reparte el espacio de la
+         celda; el item solo la ocupa. Se nota cuando una fila crece
+         porque un item tiene más texto que los demás. */
+      align-items: center;
+
+      /* Ya venía incluido: */
+      background-color: #ecf0f1;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .grid-item {
+      background-color: #3498db;
+      color: white;
+      padding: 30px;
+      text-align: center;
+      font-size: 1.5rem;
+      border-radius: 6px;
+    }
+
+    /* ==========================================
+       RESPONSIVE — solo con media queries
+       El grid de arriba mide 200×3 + 15×2 de gap + 15×2 de padding = 660px.
+       En una pantalla más angosta que eso se desborda y aparece scroll
+       horizontal. Cada media query es una excepción que solo se activa
+       cuando la pantalla entra en ese rango; fuera de él, manda la regla
+       de arriba.
+    ========================================== */
+
+    /* Tablet — de 700px para abajo: 2 columnas.
+       Acá las columnas pasan a 1fr en vez de 200px: fr reparte el espacio
+       disponible en partes iguales, así que se encogen con la pantalla en
+       vez de desbordarse. Con 200px fijos el problema volvería más abajo. */
+    @media (max-width: 700px) {
+      .grid-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Celular — de 450px para abajo: 1 columna.
+       Dos columnas en un celular dejan cada celda demasiado angosta para
+       que el contenido se lea, así que se apilan. */
+    @media (max-width: 450px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-item {
+        padding: 20px;
+        font-size: 1.25rem;
+      }
+    }
+  </style>
 </head>
 <body>
+  <h1>Mi Primer Grid</h1>
+  <p style="margin: 20px 0;">Grid de 3 columnas de 200px, que pasa a 2 y luego a 1 según el ancho de la pantalla.</p>
+
+  <div class="grid-container">
+    <div class="grid-item">1</div>
+    <div class="grid-item">2</div>
+    <div class="grid-item">3</div>
+    <div class="grid-item">4</div>
+    <div class="grid-item">5</div>
+    <div class="grid-item">6</div>
+  </div>
+
+  <h2 style="margin-top: 40px;">Ejercicio del DOM</h2>
   <button id="myButton">Click me</button>
 
   <script src="script.js"></script>
