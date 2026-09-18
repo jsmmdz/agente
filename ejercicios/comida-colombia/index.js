@@ -73,16 +73,17 @@ let platosColombia = [
   }
 ];
 
-// imágenes que ya tenemos guardadas en la carpeta, indexadas por nombre del plato
+// fotos libres de Wikimedia Commons, indexadas por nombre del plato
+const BASE_COMMONS = "https://commons.wikimedia.org/wiki/Special:FilePath/";
 const imagenesConocidas = {
-  "Bandeja Paisa": "bandeja-paisa.jpg",
-  "Ajiaco Santafereño": "ajiaco.jpg",
-  "Arepa de Choclo": "arepa-choclo.jpg",
-  "Sancocho de Gallina": "sancocho.jpg",
-  "Lechona Tolimense": "lechona.jpg",
-  "Tamal Tolimense": "tamal.jpg",
-  "Buñuelo": "bunuelo.jpg",
-  "Arequipe": "arequipe.jpg"
+  "Bandeja Paisa": BASE_COMMONS + "Bandeja_Paisa_-_Comida_tipica_colombiana.jpg",
+  "Ajiaco Santafereño": BASE_COMMONS + "Ajiaco_in_Bogot%C3%A1.jpg",
+  "Arepa de Choclo": BASE_COMMONS + "Arepa_de_chocolo.jpg",
+  "Sancocho de Gallina": BASE_COMMONS + "Sancocho_de_gallina_criolla.jpg",
+  "Lechona Tolimense": BASE_COMMONS + "Lechona.JPG",
+  "Tamal Tolimense": BASE_COMMONS + "Tamal_tolimense_abierto.jpg",
+  "Buñuelo": BASE_COMMONS + "Bu%C3%B1uelos_Colombianos_(24221303805).jpg",
+  "Arequipe": BASE_COMMONS + "Breva_con_arequipe_2014-04-17_15-37.jpg"
 };
 
 function crearImagenPlaceholder(plato) {

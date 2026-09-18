@@ -89,7 +89,7 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   opacity: 0;
   transition: opacity 0.25s ease;
 }
@@ -99,17 +99,18 @@ main {
 }
 
 .food-hover-item {
-  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
   line-height: 1.3;
 }
 
-.food-hover-label {
-  display: block;
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--amarillo-pastel);
-  margin-bottom: 2px;
+.food-hover-icon {
+  flex-shrink: 0;
+  width: 1.4em;
+  font-size: 1.1rem;
+  text-align: center;
 }
 
 /* Cuerpo de la carta */
