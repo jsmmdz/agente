@@ -6,7 +6,6 @@ let platosColombia = [
     esVegetariano: false,
     descripcionBreve: "Plato contundente con frijoles, arroz, carnes y arepa, símbolo de la gastronomía antioqueña.",
     saboresDominantes: ["Salado", "Ahumado"],
-    bebidaTradicional: "Jugo de lulo"
   },
   {
     nombre: "Ajiaco Santafereño",
@@ -15,7 +14,6 @@ let platosColombia = [
     esVegetariano: false,
     descripcionBreve: "Sopa cremosa de pollo y tres tipos de papa, perfumada con guascas.",
     saboresDominantes: ["Herbal", "Cremoso"],
-    bebidaTradicional: "Chocolate caliente"
   },
   {
     nombre: "Arepa de Choclo",
@@ -24,7 +22,6 @@ let platosColombia = [
     esVegetariano: true,
     descripcionBreve: "Arepa dulce de maíz tierno rellena de queso, típica del desayuno cafetero.",
     saboresDominantes: ["Dulce", "Suave"],
-    bebidaTradicional: "Café"
   },
   {
     nombre: "Sancocho de Gallina",
@@ -33,7 +30,6 @@ let platosColombia = [
     esVegetariano: false,
     descripcionBreve: "Caldo espeso de gallina con yuca, plátano y mazorca, plato de reunión familiar.",
     saboresDominantes: ["Especiado", "Reconfortante"],
-    bebidaTradicional: "Limonada de panela"
   },
   {
     nombre: "Lechona Tolimense",
@@ -42,7 +38,6 @@ let platosColombia = [
     esVegetariano: false,
     descripcionBreve: "Cerdo relleno de arroz y arveja, horneado por horas hasta quedar crocante.",
     saboresDominantes: ["Crocante", "Sabroso"],
-    bebidaTradicional: "Cerveza artesanal"
   },
   {
     nombre: "Tamal Tolimense",
@@ -51,7 +46,6 @@ let platosColombia = [
     esVegetariano: false,
     descripcionBreve: "Masa de maíz envuelta en hoja de plátano, rellena de carnes y verduras.",
     saboresDominantes: ["Terroso", "Suave"],
-    bebidaTradicional: "Chocolate santafereño"
   },
   {
     nombre: "Buñuelo",
@@ -60,7 +54,6 @@ let platosColombia = [
     esVegetariano: true,
     descripcionBreve: "Bola frita de queso costeño, infaltable en la mesa navideña.",
     saboresDominantes: ["Salado", "Crocante"],
-    bebidaTradicional: "Natilla"
   },
   {
     nombre: "Arequipe",
@@ -69,7 +62,6 @@ let platosColombia = [
     esVegetariano: true,
     descripcionBreve: "Dulce de leche espeso y caramelizado, base de postres y acompañante de frutas.",
     saboresDominantes: ["Dulce", "Cremoso"],
-    bebidaTradicional: "Café con leche"
   }
 ];
 
@@ -118,7 +110,6 @@ platosColombia.forEach((plato, indice) => {
   carta.querySelector(".js-tiempo").textContent = `${plato.tiempoPreparacionMin} min`;
   carta.querySelector(".js-sabores").textContent = plato.saboresDominantes.join(", ");
   carta.querySelector(".js-region-hover").textContent = plato.region;
-  carta.querySelector(".js-bebida").textContent = plato.bebidaTradicional;
 
   carta.querySelector(".js-descripcion").textContent = plato.descripcionBreve;
 
