@@ -4,7 +4,7 @@ let platosColombia = [
     region: "Antioquia",
     tiempoPreparacionMin: 90,
     esVegetariano: false,
-    ingredientesPrincipales: ["Frijoles", "Arroz", "Chicharrón", "Arepa"],
+    descripcionBreve: "Plato contundente con frijoles, arroz, carnes y arepa, símbolo de la gastronomía antioqueña.",
     saboresDominantes: ["Salado", "Ahumado"],
     bebidaTradicional: "Jugo de lulo"
   },
@@ -13,7 +13,7 @@ let platosColombia = [
     region: "Bogotá / Cundinamarca",
     tiempoPreparacionMin: 75,
     esVegetariano: false,
-    ingredientesPrincipales: ["Pollo", "Papa criolla", "Guascas", "Mazorca"],
+    descripcionBreve: "Sopa cremosa de pollo y tres tipos de papa, perfumada con guascas.",
     saboresDominantes: ["Herbal", "Cremoso"],
     bebidaTradicional: "Chocolate caliente"
   },
@@ -22,7 +22,7 @@ let platosColombia = [
     region: "Eje Cafetero",
     tiempoPreparacionMin: 30,
     esVegetariano: true,
-    ingredientesPrincipales: ["Maíz tierno", "Queso", "Mantequilla"],
+    descripcionBreve: "Arepa dulce de maíz tierno rellena de queso, típica del desayuno cafetero.",
     saboresDominantes: ["Dulce", "Suave"],
     bebidaTradicional: "Café"
   },
@@ -31,7 +31,7 @@ let platosColombia = [
     region: "Valle del Cauca",
     tiempoPreparacionMin: 120,
     esVegetariano: false,
-    ingredientesPrincipales: ["Gallina", "Yuca", "Plátano", "Mazorca"],
+    descripcionBreve: "Caldo espeso de gallina con yuca, plátano y mazorca, plato de reunión familiar.",
     saboresDominantes: ["Especiado", "Reconfortante"],
     bebidaTradicional: "Limonada de panela"
   },
@@ -40,7 +40,7 @@ let platosColombia = [
     region: "Tolima",
     tiempoPreparacionMin: 480,
     esVegetariano: false,
-    ingredientesPrincipales: ["Cerdo", "Arroz", "Arveja", "Especias"],
+    descripcionBreve: "Cerdo relleno de arroz y arveja, horneado por horas hasta quedar crocante.",
     saboresDominantes: ["Crocante", "Sabroso"],
     bebidaTradicional: "Cerveza artesanal"
   },
@@ -49,7 +49,7 @@ let platosColombia = [
     region: "Tolima / Huila",
     tiempoPreparacionMin: 240,
     esVegetariano: false,
-    ingredientesPrincipales: ["Masa de maíz", "Cerdo", "Pollo", "Hoja de plátano"],
+    descripcionBreve: "Masa de maíz envuelta en hoja de plátano, rellena de carnes y verduras.",
     saboresDominantes: ["Terroso", "Suave"],
     bebidaTradicional: "Chocolate santafereño"
   },
@@ -58,7 +58,7 @@ let platosColombia = [
     region: "Nacional",
     tiempoPreparacionMin: 45,
     esVegetariano: true,
-    ingredientesPrincipales: ["Queso costeño", "Almidón de yuca", "Huevo"],
+    descripcionBreve: "Bola frita de queso costeño, infaltable en la mesa navideña.",
     saboresDominantes: ["Salado", "Crocante"],
     bebidaTradicional: "Natilla"
   },
@@ -67,7 +67,7 @@ let platosColombia = [
     region: "Nacional",
     tiempoPreparacionMin: 60,
     esVegetariano: true,
-    ingredientesPrincipales: ["Leche", "Azúcar", "Bicarbonato"],
+    descripcionBreve: "Dulce de leche espeso y caramelizado, base de postres y acompañante de frutas.",
     saboresDominantes: ["Dulce", "Cremoso"],
     bebidaTradicional: "Café con leche"
   }
@@ -102,9 +102,10 @@ platosColombia.forEach((plato, indice) => {
 
   carta.querySelector(".js-nombre").textContent = plato.nombre;
   carta.querySelector(".js-region").textContent = plato.region;
-  carta.querySelector(".js-vegetariano").textContent = plato.esVegetariano
-    ? "Vegetariano"
-    : "Con carne";
+
+  const vegEl = carta.querySelector(".js-vegetariano");
+  vegEl.textContent = plato.esVegetariano ? "Vegetariano" : "Con carne";
+  vegEl.classList.toggle("food-veg-tag--carne", !plato.esVegetariano);
 
   const imagenEl = carta.querySelector(".js-imagen");
   imagenEl.alt = plato.nombre;
@@ -119,12 +120,7 @@ platosColombia.forEach((plato, indice) => {
   carta.querySelector(".js-region-hover").textContent = plato.region;
   carta.querySelector(".js-bebida").textContent = plato.bebidaTradicional;
 
-  const ingredientesEl = carta.querySelector(".js-ingredientes");
-  plato.ingredientesPrincipales.forEach((ingrediente) => {
-    const li = document.createElement("li");
-    li.textContent = ingrediente;
-    ingredientesEl.appendChild(li);
-  });
+  carta.querySelector(".js-descripcion").textContent = plato.descripcionBreve;
 
   carta.querySelector(".js-numero").textContent =
     `N.º ${String(indice + 1).padStart(3, "0")}`;

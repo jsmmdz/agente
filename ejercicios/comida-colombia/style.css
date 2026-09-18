@@ -52,6 +52,7 @@ main {
 
 /* ===== Carta minimalista ===== */
 .food-card {
+  position: relative;
   width: 280px;
   border-radius: 16px;
   background: #ffffff;
@@ -65,9 +66,8 @@ main {
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
 }
 
-/* Imagen + overlay de hover */
+/* Imagen */
 .food-img-frame {
-  position: relative;
   height: 180px;
   background: var(--azul-pastel);
   overflow: hidden;
@@ -109,7 +109,7 @@ main {
 .food-hover-icon {
   flex-shrink: 0;
   width: 1.4em;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   text-align: center;
 }
 
@@ -142,6 +142,10 @@ main {
   color: var(--texto);
 }
 
+.food-veg-tag--carne {
+  background: var(--rojo-pastel);
+}
+
 .food-region-tag {
   display: inline-block;
   font-size: 0.7rem;
@@ -153,20 +157,11 @@ main {
   margin-bottom: 10px;
 }
 
-.food-ingredientes {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.food-descripcion {
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+  line-height: 1.4;
   margin-bottom: 10px;
-}
-
-.food-ingredientes li {
-  font-size: 0.7rem;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: var(--rojo-pastel);
-  color: var(--texto);
 }
 
 .food-numero {
