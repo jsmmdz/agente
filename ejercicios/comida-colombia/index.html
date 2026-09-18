@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comida Típica de Colombia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>Sabores de Colombia</h1>
+    <p class="subtitle">Un recorrido por platos típicos de cada región</p>
+  </header>
+
+  <main>
+    <div id="inventario"></div>
+  </main>
+
+  <footer class="site-footer">
+    <p>Catálogo con fines educativos — DOM + arrays de objetos</p>
+  </footer>
+
+  <template id="plato-template">
+    <article class="food-card">
+      <div class="food-img-frame">
+        <img class="js-imagen" src="" alt="" />
+        <div class="food-hover">
+          <p class="food-hover-item">
+            <span class="food-hover-label">Tiempo</span>
+            <span class="js-tiempo"></span>
+          </p>
+          <p class="food-hover-item">
+            <span class="food-hover-label">Sabores</span>
+            <span class="js-sabores"></span>
+          </p>
+          <p class="food-hover-item">
+            <span class="food-hover-label">Región</span>
+            <span class="js-region-hover"></span>
+          </p>
+          <p class="food-hover-item">
+            <span class="food-hover-label">Para acompañar</span>
+            <span class="js-bebida"></span>
+          </p>
+        </div>
+      </div>
+
+      <div class="food-body">
+        <div class="food-header">
+          <h2 class="js-nombre"></h2>
+          <span class="js-vegetariano food-veg-tag"></span>
+        </div>
+
+        <span class="js-region food-region-tag"></span>
+
+        <ul class="js-ingredientes food-ingredientes"></ul>
+
+        <p class="js-numero food-numero"></p>
+      </div>
+    </article>
+  </template>
+
+  <script src="index.js"></script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --amarillo-pastel: #f7e6b4;
+  --azul-pastel: #b9dde3;
+  --rojo-pastel: #f2c2bd;
+  --crema: #faf7f0;
+  --texto: #3a3a3a;
+  --texto-suave: #767066;
+}
+
+body {
+  font-family: 'Nunito', 'Segoe UI', Arial, sans-serif;
+  background-color: var(--crema);
+  color: var(--texto);
+  min-height: 100vh;
+}
+
+/* Header */
+.site-header {
+  text-align: center;
+  padding: 48px 20px 32px;
+}
+
+.site-header h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 2.4rem;
+  color: var(--texto);
+}
+
+.site-header .subtitle {
+  margin-top: 8px;
+  font-size: 1rem;
+  color: var(--texto-suave);
+}
+
+/* Contenido principal */
+main {
+  padding: 20px 20px 60px;
+}
+
+#inventario {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 28px;
+}
+
+/* ===== Carta minimalista ===== */
+.food-card {
+  width: 280px;
+  border-radius: 16px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.food-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+}
+
+/* Imagen + overlay de hover */
+.food-img-frame {
+  position: relative;
+  height: 180px;
+  background: var(--azul-pastel);
+  overflow: hidden;
+}
+
+.food-img-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.food-hover {
+  position: absolute;
+  inset: 0;
+  background: rgba(58, 58, 58, 0.88);
+  color: #fff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.food-card:hover .food-hover {
+  opacity: 1;
+}
+
+.food-hover-item {
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.food-hover-label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--amarillo-pastel);
+  margin-bottom: 2px;
+}
+
+/* Cuerpo de la carta */
+.food-body {
+  padding: 16px;
+}
+
+.food-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.food-header h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.food-veg-tag {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--azul-pastel);
+  color: var(--texto);
+}
+
+.food-region-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--amarillo-pastel);
+  color: var(--texto);
+  margin-bottom: 10px;
+}
+
+.food-ingredientes {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.food-ingredientes li {
+  font-size: 0.7rem;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--rojo-pastel);
+  color: var(--texto);
+}
+
+.food-numero {
+  font-size: 0.65rem;
+  color: var(--texto-suave);
+  border-top: 1px solid #eee;
+  padding-top: 8px;
+}
+
+/* Footer del sitio */
+.site-footer {
+  text-align: center;
+  padding: 20px;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .site-header {
+    padding: 32px 16px 24px;
+  }
+
+  .site-header h1 {
+    font-size: 1.9rem;
+  }
+
+  #inventario {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .food-card {
+    width: 100%;
+    max-width: 320px;
+  }
+}
