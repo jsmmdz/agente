@@ -29,3 +29,11 @@ prioricé cerrar primero lo que el rubric pedía como obligatorio (breakpoints,
 comentarios explicando el porqué de cada bloque) y dejé la exploración de
 estilo para el final, documentándola aunque no cambié el CSS final — tal como
 pide la consigna.
+
+**Actualización, misma sesión**: terminé adoptando el flip 3D como versión
+final (antes lo había descartado por el punto anterior). Resolví el costo del
+alto fijo midiendo el contenido más largo de las 8 tarjetas y dejando margen
+de sobra en `.food-card` (400px desktop / 370px tablet / 420px mobile) — con
+eso ninguna descripción se recorta. El costo de "esconder el nombre al
+voltear" lo acepté: para este catálogo priman los datos de exploración
+(tiempo, sabores, región) por sobre tener el nombre visible todo el tiempo.

@@ -80,7 +80,7 @@ const imagenesConocidas = {
   "Lechona Tolimense": BASE_COMMONS + "Lechona.JPG",
   "Tamal Tolimense": BASE_COMMONS + "Tamal_tolimense_abierto.jpg",
   "Buñuelo": BASE_COMMONS + "Bu%C3%B1uelos_Colombianos_(24221303805).jpg",
-  "Arequipe": BASE_COMMONS + "Breva_con_arequipe_2014-04-17_15-37.jpg"
+  "Arequipe": BASE_COMMONS + "Dulce_de_leche_in_the_glass_jar.jpg"
 };
 
 // Si una foto real no carga (o el plato no tiene URL en imagenesConocidas),

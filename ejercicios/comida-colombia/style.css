@@ -50,30 +50,70 @@ main {
   gap: 28px;
 }
 
-/* ===== Carta minimalista =====
-   position: relative es lo que le da a .food-hover un marco de referencia
-   para su position: absolute — sin esto, el overlay se pegaría a la
-   ventana entera en vez de a la tarjeta. */
+/* ===== Carta minimalista con giro 3D =====
+   .food-card necesita un alto fijo: al girar en el eje Y, las dos caras
+   quedan superpuestas (position: absolute cada una), así que algo tiene
+   que decirle al contenedor cuánto mide — si no, colapsaría a 0px.
+   perspective es la "distancia de la cámara" al plano de la tarjeta:
+   sin ella, el giro se vería aplastado en vez de tridimensional. */
 .food-card {
-  position: relative;
   width: 280px;
-  border-radius: 16px;
-  background: #ffffff;
-  overflow: hidden;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 400px;
+  perspective: 1200px;
 }
 
-/* Al pasar el mouse, la carta "flota" un poco (transform) y agranda su
-   sombra — la transition de arriba hace que ese cambio sea suave, no un salto. */
-.food-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+/* Este es el elemento que realmente rota. transform-style: preserve-3d
+   le dice al navegador que respete la profundidad 3D de sus hijos (las
+   dos caras) en vez de aplanarlos sobre el plano de la pantalla. */
+.food-flipper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+/* Al hacer hover sobre la carta, giramos el flipper 180° sobre el eje Y
+   (como si fuera una moneda parada girando). Las dos caras van pegadas
+   a este mismo elemento, así que giran juntas. */
+.food-card:hover .food-flipper {
+  transform: rotateY(180deg);
+}
+
+/* Ambas caras ocupan exactamente el mismo espacio (inset: 0 sobre el
+   flipper, que mide 100% x 100%). backface-visibility: hidden es la
+   clave: sin esto, verías la cara de atrás "en espejo" transparentándose
+   sobre la de adelante en vez de que una tape a la otra. */
+.food-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.food-face--front {
+  background: #ffffff;
+}
+
+/* Esta cara nace ya rotada 180° — por eso al inicio no se ve (queda
+   mirando "hacia atrás"). Cuando el flipper gira 180°, esta rotación se
+   cancela con la del flipper y queda mirando al frente. */
+.food-face--back {
+  background: rgba(58, 58, 58, 0.95);
+  color: #fff;
+  transform: rotateY(180deg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
 }
 
 /* Imagen */
 .food-img-frame {
-  height: 180px;
+  height: 170px;
   background: var(--azul-pastel);
   overflow: hidden;
 }
@@ -83,27 +123,6 @@ main {
   height: 100%;
   object-fit: cover;
   display: block;
-}
-
-/* Overlay que cubre TODA la tarjeta (inset: 0 dentro de .food-card, que es
-   relative) con los datos extra. Empieza invisible (opacity: 0) y solo se
-   revela con la regla de abajo cuando el usuario pasa el mouse sobre la carta. */
-.food-hover {
-  position: absolute;
-  inset: 0;
-  background: rgba(58, 58, 58, 0.88);
-  color: #fff;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.food-card:hover .food-hover {
-  opacity: 1;
 }
 
 .food-hover-item {
@@ -208,10 +227,11 @@ main {
 
   .food-card {
     width: 240px;
+    height: 370px;
   }
 
   .food-img-frame {
-    height: 150px;
+    height: 140px;
   }
 }
 
@@ -233,5 +253,6 @@ main {
   .food-card {
     width: 100%;
     max-width: 320px;
+    height: 420px;
   }
 }
