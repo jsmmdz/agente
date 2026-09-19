@@ -9,4 +9,4 @@ escribí `Sin fecha` — el agente lo va a decir explícitamente en vez de asumi
 
 | Taller | Entrega | Fecha | Estado |
 |---|---|---|---|
-|  |  |  |  |
+| Objetos y arrays (colección con DOM) | Link CodePen + captura en Brightspace (Entregas → Objetos) | 2026-09-18 | En proceso |
