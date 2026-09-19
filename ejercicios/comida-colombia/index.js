@@ -1,3 +1,7 @@
+// Array de objetos: cada plato es un objeto con las mismas 6 propiedades,
+// así el forEach de más abajo puede tratarlos todos igual sin importar cuál sea.
+// Tipos de dato representados: texto (nombre, region, descripcionBreve),
+// número (tiempoPreparacionMin), booleano (esVegetariano) y array (saboresDominantes).
 let platosColombia = [
   {
     nombre: "Bandeja Paisa",
@@ -65,7 +69,8 @@ let platosColombia = [
   }
 ];
 
-// fotos libres de Wikimedia Commons, indexadas por nombre del plato
+// Mapa nombre → URL de foto. Se usa un objeto (no el array de arriba) porque
+// acá buscamos por nombre exacto en vez de recorrer todo, es más directo.
 const BASE_COMMONS = "https://commons.wikimedia.org/wiki/Special:FilePath/";
 const imagenesConocidas = {
   "Bandeja Paisa": BASE_COMMONS + "Bandeja_Paisa_-_Comida_tipica_colombiana.jpg",
@@ -78,6 +83,9 @@ const imagenesConocidas = {
   "Arequipe": BASE_COMMONS + "Breva_con_arequipe_2014-04-17_15-37.jpg"
 };
 
+// Si una foto real no carga (o el plato no tiene URL en imagenesConocidas),
+// generamos una imagen de reemplazo al vuelo con el nombre del plato escrito
+// dentro de un SVG. Así ninguna tarjeta se queda con un ícono roto.
 function crearImagenPlaceholder(plato) {
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='190'>
     <rect width='100%' height='100%' fill='#f3e9d2'/>
@@ -89,16 +97,24 @@ function crearImagenPlaceholder(plato) {
 const inventarioEl = document.getElementById("inventario");
 const plantillaPlato = document.getElementById("plato-template");
 
+// Acá pasa el renderizado real: por cada plato del array clonamos la
+// plantilla del HTML (el <template>, que no se ve en pantalla) y llenamos
+// sus huecos (.js-*) con los datos de ese plato. El HTML nunca tiene
+// tarjetas escritas a mano — todas nacen de este bucle.
 platosColombia.forEach((plato, indice) => {
   const carta = plantillaPlato.content.cloneNode(true);
 
   carta.querySelector(".js-nombre").textContent = plato.nombre;
   carta.querySelector(".js-region").textContent = plato.region;
 
+  // La etiqueta cambia de texto Y de color según el booleano esVegetariano:
+  // así el dato no solo se lee, también se ve (azul = vegetariano, rojo = con carne).
   const vegEl = carta.querySelector(".js-vegetariano");
   vegEl.textContent = plato.esVegetariano ? "Vegetariano" : "Con carne";
   vegEl.classList.toggle("food-veg-tag--carne", !plato.esVegetariano);
 
+  // Intentamos la foto real primero; si falla la carga (onerror), la
+  // reemplazamos por el placeholder generado arriba.
   const imagenEl = carta.querySelector(".js-imagen");
   imagenEl.alt = plato.nombre;
   imagenEl.src = imagenesConocidas[plato.nombre] || crearImagenPlaceholder(plato);
@@ -107,12 +123,16 @@ platosColombia.forEach((plato, indice) => {
     imagenEl.src = crearImagenPlaceholder(plato);
   };
 
+  // Estos cuatro datos solo se muestran en el hover (ver .food-hover en el CSS),
+  // por eso van en elementos aparte de los que se ven siempre en la tarjeta.
   carta.querySelector(".js-tiempo").textContent = `${plato.tiempoPreparacionMin} min`;
   carta.querySelector(".js-sabores").textContent = plato.saboresDominantes.join(", ");
   carta.querySelector(".js-region-hover").textContent = plato.region;
 
   carta.querySelector(".js-descripcion").textContent = plato.descripcionBreve;
 
+  // padStart rellena con ceros a la izquierda (1 -> "001") para que el
+  // número de catálogo se vea parejo sin importar cuántos platos haya.
   carta.querySelector(".js-numero").textContent =
     `N.º ${String(indice + 1).padStart(3, "0")}`;
 

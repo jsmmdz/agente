@@ -50,7 +50,10 @@ main {
   gap: 28px;
 }
 
-/* ===== Carta minimalista ===== */
+/* ===== Carta minimalista =====
+   position: relative es lo que le da a .food-hover un marco de referencia
+   para su position: absolute — sin esto, el overlay se pegaría a la
+   ventana entera en vez de a la tarjeta. */
 .food-card {
   position: relative;
   width: 280px;
@@ -61,6 +64,8 @@ main {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Al pasar el mouse, la carta "flota" un poco (transform) y agranda su
+   sombra — la transition de arriba hace que ese cambio sea suave, no un salto. */
 .food-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
@@ -80,6 +85,9 @@ main {
   display: block;
 }
 
+/* Overlay que cubre TODA la tarjeta (inset: 0 dentro de .food-card, que es
+   relative) con los datos extra. Empieza invisible (opacity: 0) y solo se
+   revela con la regla de abajo cuando el usuario pasa el mouse sobre la carta. */
 .food-hover {
   position: absolute;
   inset: 0;
@@ -142,6 +150,8 @@ main {
   color: var(--texto);
 }
 
+/* El JS agrega esta clase solo cuando esVegetariano es false — es la parte
+   visual del dato booleano: azul por defecto, rojo cuando el plato lleva carne. */
 .food-veg-tag--carne {
   background: var(--rojo-pastel);
 }
@@ -179,7 +189,33 @@ main {
   font-size: 0.85rem;
 }
 
-/* ===== Responsive ===== */
+/* =====================================================
+   Responsive — 3 breakpoints: desktop (base), tablet, mobile
+   Desktop: estilos base de arriba (> 1024px)
+   Tablet:  hasta 1024px  → cartas un poco más chicas, mismo grid
+   Mobile:  hasta 600px   → una sola columna
+   ===================================================== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  main {
+    padding: 16px 16px 48px;
+  }
+
+  #inventario {
+    gap: 20px;
+  }
+
+  .food-card {
+    width: 240px;
+  }
+
+  .food-img-frame {
+    height: 150px;
+  }
+}
+
+/* Mobile */
 @media (max-width: 600px) {
   .site-header {
     padding: 32px 16px 24px;

@@ -22,6 +22,13 @@
     <p>Catálogo con fines educativos — DOM + arrays de objetos</p>
   </footer>
 
+  <!--
+    Esta plantilla NO se muestra en pantalla (así funciona <template>):
+    el navegador la guarda lista para clonar pero no la renderiza.
+    index.js clona su contenido una vez por cada plato del array y llena
+    los elementos .js-* con los datos de ese plato. Por eso acá abajo no
+    hay ninguna tarjeta "real" escrita a mano.
+  -->
   <template id="plato-template">
     <article class="food-card">
       <div class="food-img-frame">
