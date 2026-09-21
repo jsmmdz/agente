@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrays - Marcas de ropa</title>
+</head>
+<body>
+    <h1>Marcas de ropa</h1>
+
+    <input type="text" id="input" placeholder="Nombre de la marca">
+    <button id="button">Agregar marca</button>
+    <button id="button2">Mostrar lista</button>
+    <button id="button3">Eliminar el último</button>
+    <button id="button4">Eliminar el primero</button>
+    <button id="button5">Buscar marca</button>
+    <button id="EliminarElemento" >EliminarElemento</button>
+
+    <p id="mensaje"></p>
+    <ul id="marcas-list"></ul>
+
+    <script>
+        let marcas = [
+            "nike",
+            "adidas",
+            "puma",
+            "zara",
+            "h&m",
+            "levi's",
+            "uniqlo",
+            "gucci",
+            "prada",
+            "louis vuitton",
+            "chanel",
+            "versace",
+            "tommy hilfiger",
+            "calvin klein",
+            "ralph lauren",
+            "lacoste",
+            "under armour",
+            "reebok",
+            "new balance",
+            "converse",
+            "vans",
+            "the north face",
+            "patagonia",
+            "diesel",
+            "mango",
+            "bershka",
+            "pull&bear",
+            "supreme",
+            "off-white",
+            "balenciaga"
+        ];
+
+        console.log("Existen " + marcas.length + " marcas en el array.");
+
+        const mensaje = document.getElementById("mensaje");
+        const marcasList = document.getElementById("marcas-list");
+
+        function mostrarLista() {
+            marcasList.innerHTML = "";
+            marcas.forEach(function(marca) {
+                const li = document.createElement("li");
+                li.textContent = marca;
+                marcasList.appendChild(li);
+            });
+        }
+
+        function suma(a, b) {
+            return a + b;
+        }
+
+        function saludo() {
+            console.log("Hola, bienvenid@, son los mejores");
+        }
+
+        function eliminarUltimoElemento() {
+            var ultimoElemento = marcas.pop();
+            mensaje.textContent = "Eliminado: " + ultimoElemento;
+            //console.log("Eliminado: " + ultimoElemento);
+            mostrarLista();
+        }
+
+        function eliminarPrimerElemento() {
+            var primerElemento = marcas.shift();
+            mensaje.textContent = "Eliminado: " + primerElemento;
+            //console.log("Eliminado: " + primerElemento);
+            mostrarLista();
+        }
+
+        const button = document.getElementById("button");
+        button.addEventListener("click", function() {
+            const input = document.getElementById("input");
+            const valor = input.value.trim();
+            if (valor === "") {
+                return;
+            }
+            console.log("dato ingresado: ", valor);
+            // agregar el valor al final del array
+            marcas.push(valor);
+            input.value = "";
+            mostrarLista();
+        });
+
+        function buscarElemento() {
+            var input = document.getElementById("input").value.trim().toLowerCase();
+            var pos = marcas.indexOf(input);
+            console.log(pos);
+            if (pos === -1) {
+                mensaje.textContent = "No encontrada: " + input;
+            } else {
+                mensaje.textContent = input + " está en la posición " + pos;
+            }
+        
+
+        if (pos!== -1){
+            mensaje.textContent = "si se encuentra" + input +" en la posicion: " + pos;
+        }
+        else {
+            mensaje.textContent = "no se encuentra" + input + "en el arreglo";
+        }
+    }
+
+    const button5 = document.getElementById("button5");
+    button5.addEventListener("click", buscarElemento);
+
+        const button2 = document.getElementById("button2");
+        button2.addEventListener("click", mostrarLista);
+
+        const button3 = document.getElementById("button3");
+        button3.addEventListener("click", eliminarUltimoElemento);
+
+        const button4 = document.getElementById("button4");
+        button4.addEventListener("click", eliminarPrimerElemento);
+    
+    function EliminarElemento(){}
+    
+    
+    
+    
+    
+    
+    </script>
+</body>
+</html>
