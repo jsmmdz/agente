@@ -14,7 +14,7 @@
     <button id="button3">Eliminar el último</button>
     <button id="button4">Eliminar el primero</button>
     <button id="button5">Buscar marca</button>
-    <button id="EliminarElemento" >EliminarElemento</button>
+    <button id="EliminarElemento">Eliminar específico</button>
 
     <p id="mensaje"></p>
     <ul id="marcas-list"></ul>
@@ -58,6 +58,10 @@
         const mensaje = document.getElementById("mensaje");
         const marcasList = document.getElementById("marcas-list");
 
+        // Repinta toda la lista desde cero: se vacía innerHTML y se vuelve a
+        // recorrer el array completo con forEach. Es más simple que buscar
+        // qué cambió y tocar solo esa parte del DOM, y para un array chico
+        // como este no cuesta rendimiento notarlo.
         function mostrarLista() {
             marcasList.innerHTML = "";
             marcas.forEach(function(marca) {
@@ -75,6 +79,8 @@
             console.log("Hola, bienvenid@, son los mejores");
         }
 
+        // pop() saca y devuelve el último elemento del array — solo puede
+        // tocar ese extremo, por eso no sirve para borrar uno específico.
         function eliminarUltimoElemento() {
             var ultimoElemento = marcas.pop();
             mensaje.textContent = "Eliminado: " + ultimoElemento;
@@ -82,6 +88,8 @@
             mostrarLista();
         }
 
+        // shift() es el equivalente de pop() pero en el otro extremo: saca y
+        // devuelve el primer elemento del array.
         function eliminarPrimerElemento() {
             var primerElemento = marcas.shift();
             mensaje.textContent = "Eliminado: " + primerElemento;
@@ -103,6 +111,11 @@
             mostrarLista();
         });
 
+        // indexOf busca el valor exacto en el array y devuelve su posición
+        // (o -1 si no está). toLowerCase() normaliza lo escrito porque
+        // indexOf compara texto de forma estricta: "Nike" y "nike" son
+        // valores distintos para JavaScript, y el array guarda todo en
+        // minúscula.
         function buscarElemento() {
             var input = document.getElementById("input").value.trim().toLowerCase();
             var pos = marcas.indexOf(input);
@@ -134,7 +147,25 @@
         const button4 = document.getElementById("button4");
         button4.addEventListener("click", eliminarPrimerElemento);
     
-    function EliminarElemento(){}
+    // A diferencia de eliminarUltimoElemento/eliminarPrimerElemento (que
+    // solo tocan los extremos), esta función borra un elemento específico:
+    // primero lo ubica con indexOf y después lo saca con splice(pos, 1),
+    // que es el único de estos métodos que recibe una posición cualquiera.
+    function EliminarElemento(){
+        var input = document.getElementById("input").value.trim().toLowerCase();
+        var pos = marcas.indexOf(input);
+
+        if (pos === -1) {
+            mensaje.textContent = "No encontrada: " + input;
+        } else {
+            marcas.splice(pos, 1);
+            mensaje.textContent = "Eliminado: " + input;
+            mostrarLista();
+        }
+    }
+
+    const buttonEliminarElemento = document.getElementById("EliminarElemento");
+    buttonEliminarElemento.addEventListener("click", EliminarElemento);
     
     
     

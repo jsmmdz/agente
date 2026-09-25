@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de platos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <h1>Gestión de platos</h1>
+  <p class="subtitle">Crear, consultar, editar y eliminar platos del inventario</p>
+</header>
+
+<!--
+  Panel de login: es lo único visible al cargar la página. gestion.js compara
+  lo que se escribe acá contra user/pass de CREDENCIALES.JS; si coincide,
+  oculta este panel y muestra #app-gestion (el aside + los 4 procesos CRUD).
+-->
+<div id="panel-login" class="login-panel">
+  <form id="form-login" class="gestion-form login-form">
+    <h2>Iniciar sesión</h2>
+    <label>Usuario
+      <input type="text" name="usuario" autocomplete="username" required>
+    </label>
+    <label>Contraseña
+      <input type="password" name="password" autocomplete="current-password" required>
+    </label>
+    <p id="login-error" class="login-error" hidden>Usuario o contraseña incorrectos.</p>
+    <button type="submit">Entrar</button>
+  </form>
+</div>
+
+<div id="app-gestion" class="gestion-layout" hidden>
+  <!-- Cada enlace apunta al id de un panel (#listar, #crear...). El CSS usa
+       :target para mostrar solo el panel elegido, sin JavaScript todavía. -->
+  <aside class="gestion-aside">
+    <nav>
+      <ul class="gestion-menu">
+        <li><a href="#listar">Listar platos</a></li>
+        <li><a href="#crear">Crear plato</a></li>
+        <li><a href="#editar">Editar plato</a></li>
+        <li><a href="#eliminar">Eliminar plato</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="gestion-main">
+
+    <!-- READ -->
+    <section id="listar" class="gestion-panel">
+      <h2>Listar platos</h2>
+      <table class="gestion-tabla">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Región</th>
+            <th>Tiempo (min)</th>
+            <th>Vegetariano</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-platos"></tbody>
+      </table>
+    </section>
+
+    <!-- CREATE -->
+    <section id="crear" class="gestion-panel">
+      <h2>Crear plato</h2>
+      <form id="form-crear" class="gestion-form">
+        <label>Nombre
+          <input type="text" name="nombre" required>
+        </label>
+        <label>Región
+          <input type="text" name="region" required>
+        </label>
+        <label>Tiempo de preparación (min)
+          <input type="number" name="tiempoPreparacionMin" min="1" required>
+        </label>
+        <label class="gestion-check">
+          <input type="checkbox" name="esVegetariano"> Es vegetariano
+        </label>
+        <label>Descripción breve
+          <textarea name="descripcionBreve" rows="3"></textarea>
+        </label>
+        <label>Sabores dominantes (separados por coma)
+          <input type="text" name="saboresDominantes" placeholder="Dulce, Salado, Crocante">
+        </label>
+        <button type="submit">Guardar plato</button>
+      </form>
+    </section>
+
+    <!-- UPDATE -->
+    <section id="editar" class="gestion-panel">
+      <h2>Editar plato</h2>
+      <form id="form-editar" class="gestion-form">
+        <label>Plato a editar
+          <select name="platoSeleccionado" id="select-editar"></select>
+        </label>
+        <label>Nombre
+          <input type="text" name="nombre">
+        </label>
+        <label>Región
+          <input type="text" name="region">
+        </label>
+        <label>Tiempo de preparación (min)
+          <input type="number" name="tiempoPreparacionMin" min="1">
+        </label>
+        <label class="gestion-check">
+          <input type="checkbox" name="esVegetariano"> Es vegetariano
+        </label>
+        <label>Descripción breve
+          <textarea name="descripcionBreve" rows="3"></textarea>
+        </label>
+        <label>Sabores dominantes (separados por coma)
+          <input type="text" name="saboresDominantes">
+        </label>
+        <button type="submit">Actualizar plato</button>
+      </form>
+    </section>
+
+    <!-- DELETE -->
+    <section id="eliminar" class="gestion-panel">
+      <h2>Eliminar plato</h2>
+      <table class="gestion-tabla">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Región</th>
+            <th>Tiempo (min)</th>
+            <th>Vegetariano</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-eliminar"></tbody>
+      </table>
+    </section>
+
+  </main>
+</div>
+
+<script src="CREDENCIALES.JS"></script>
+<script src="data.js"></script>
+<script src="gestion.js"></script>
+</body>
+</html>

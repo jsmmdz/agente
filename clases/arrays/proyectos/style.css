@@ -1,0 +1,646 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --amarillo-pastel: #f7e6b4;
+  --azul-pastel: #b9dde3;
+  --rojo-pastel: #f2c2bd;
+  --crema: #faf7f0;
+  --texto: #3a3a3a;
+  --texto-suave: #767066;
+
+  /* Versiones un poco más intensas de los mismos tres colores: los pasteles
+     puros casi no se distinguen en franjas delgadas, y la decoración de la
+     bandera necesita contraste para reconocerse. */
+  --amarillo: #f0c95a;
+  --azul: #6fa8bd;
+  --rojo: #d9736a;
+
+  /* Fondo de la cara de atrás: un azul-gris muy oscuro (en vez del gris
+     neutro anterior) para que los pasteles resalten y se sienta más cálido. */
+  --noche: #2f3e46;
+}
+
+body {
+  font-family: 'Nunito', 'Segoe UI', Arial, sans-serif;
+  background-color: var(--crema);
+  color: var(--texto);
+  min-height: 100vh;
+}
+
+/* Header */
+.site-header {
+  text-align: center;
+  padding: 48px 20px 32px;
+}
+
+.site-header h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 2.4rem;
+  color: var(--texto);
+}
+
+.site-header .subtitle {
+  margin-top: 8px;
+  font-size: 1rem;
+  color: var(--texto-suave);
+}
+
+/* Contenido principal */
+main {
+  padding: 20px 20px 60px;
+}
+
+#inventario {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 28px;
+}
+
+/* ===== Carta con giro 3D =====
+   .food-card necesita un alto fijo: al girar en el eje Y, las dos caras
+   quedan superpuestas (position: absolute cada una), así que algo tiene
+   que decirle al contenedor cuánto mide — si no, colapsaría a 0px.
+   perspective es la "distancia de la cámara" al plano de la tarjeta:
+   sin ella, el giro se vería aplastado en vez de tridimensional. */
+.food-card {
+  width: 280px;
+  height: 400px;
+  perspective: 1200px;
+}
+
+/* Este es el elemento que realmente rota. transform-style: preserve-3d
+   le dice al navegador que respete la profundidad 3D de sus hijos (las
+   dos caras) en vez de aplanarlos sobre el plano de la pantalla. */
+.food-flipper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+/* Al hacer hover sobre la carta, giramos el flipper 180° sobre el eje Y
+   (como si fuera una moneda parada girando). Las dos caras van pegadas
+   a este mismo elemento, así que giran juntas. */
+.food-card:hover .food-flipper {
+  transform: rotateY(180deg);
+}
+
+/* Ambas caras ocupan exactamente el mismo espacio (inset: 0 sobre el
+   flipper, que mide 100% x 100%). backface-visibility: hidden es la
+   clave: sin esto, verías la cara de atrás "en espejo" transparentándose
+   sobre la de adelante en vez de que una tape a la otra. */
+.food-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  box-shadow: 0 6px 18px rgba(58, 45, 30, 0.14);
+}
+
+/* ----- Decoración compartida por las dos caras -----
+   Se hace con ::before y ::after (no con elementos extra en el HTML) porque
+   es puro adorno: no aporta contenido y así el template queda limpio.
+
+   ::before  = franja tricolor arriba, con las proporciones de la bandera
+               de Colombia (amarillo el doble de alto que azul y rojo).
+   ::after   = cenefa de rombos abajo, inspirada en el tejido de las
+               mochilas wayuu. Es un SVG en data URI repetido en horizontal. */
+.food-face::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: linear-gradient(
+    to bottom,
+    var(--amarillo) 0 50%,
+    var(--azul) 50% 75%,
+    var(--rojo) 75% 100%
+  );
+  z-index: 2;
+}
+
+.food-face::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 16px;
+  background-color: var(--amarillo-pastel);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M8 2 14 8 8 14 2 8Z' fill='%236fa8bd'/%3E%3Cpath d='M8 5.5 10.5 8 8 10.5 5.5 8Z' fill='%23d9736a'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: center;
+  border-top: 2px solid var(--amarillo);
+  z-index: 2;
+}
+
+/* ----- Cara de adelante ----- */
+.food-face--front {
+  background: #fffdf8;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Esta cara nace ya rotada 180° — por eso al inicio no se ve (queda
+   mirando "hacia atrás"). Cuando el flipper gira 180°, esta rotación se
+   cancela con la del flipper y queda mirando al frente. */
+.food-face--back {
+  background:
+    radial-gradient(circle at 85% 12%, rgba(240, 201, 90, 0.16), transparent 45%),
+    var(--noche);
+  color: #fff;
+  transform: rotateY(180deg);
+  padding: 30px 22px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Imagen: el marco tiene un borde inferior en amarillo para separar la foto
+   del cuerpo sin usar una línea gris genérica. */
+.food-img-frame {
+  flex-shrink: 0; /* la foto mantiene su alto; el cuerpo es el que se reparte el resto */
+  height: 195px;
+  margin-top: 10px; /* deja libre la franja tricolor de arriba */
+  background: var(--azul-pastel);
+  overflow: hidden;
+  border-bottom: 3px solid var(--amarillo);
+}
+
+.food-img-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Cuerpo del frente. flex: 1 le da todo el alto que sobra debajo de la foto.
+   El texto arranca siempre a la misma distancia (padding-top) en vez de
+   centrarse en vertical: si se centrara, las descripciones más cortas
+   subirían y las largas bajarían, y los títulos de una misma fila
+   quedarían a alturas distintas. Así todos los nombres se alinean y el
+   texto queda un poco más abajo, lejos de la foto. El padding inferior deja
+   libre la cenefa (16px). */
+.food-body {
+  flex: 1;
+  padding: 26px 18px 26px;
+  text-align: center;
+}
+
+/* Nombre con un pequeño rombo decorativo debajo, en los tres colores. */
+.food-nombre {
+  font-family: 'Fraunces', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--texto);
+}
+
+.food-nombre::after {
+  content: "";
+  display: block;
+  width: 56px;
+  height: 6px;
+  margin: 8px auto 10px;
+  background: linear-gradient(
+    to right,
+    var(--amarillo) 0 50%,
+    var(--azul) 50% 75%,
+    var(--rojo) 75% 100%
+  );
+  border-radius: 3px;
+}
+
+.food-descripcion {
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+  line-height: 1.45;
+}
+
+/* ----- Cara de atrás ----- */
+.food-back-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--amarillo-pastel);
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.food-back-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 19px;
+  margin-top: 10px;
+}
+
+.food-hover-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Círculo con el ícono SVG dentro. Cada ítem usa un color pastel distinto
+   (amarillo, azul, amarillo, azul) y solo "carne" cambia a rojo. */
+.food-hover-icon {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--azul-pastel);
+  color: var(--noche);
+}
+
+.food-hover-item:nth-child(odd) .food-hover-icon {
+  background: var(--amarillo-pastel);
+}
+
+/* El JS agrega esta clase solo cuando esVegetariano es false — es la parte
+   visual del dato booleano: azul cuando es vegetariano, rojo con carne. */
+.food-hover-item--carne .food-hover-icon {
+  background: var(--rojo-pastel);
+}
+
+/* Los SVG heredan el color del círculo (currentColor) y se dibujan solo con
+   trazo, sin relleno, para que se vean finos y elegantes. */
+.food-hover-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* El atributo hidden solo oculta por sí solo a los elementos HTML; los <svg>
+   no lo respetan. Por eso esta regla es necesaria: sin ella se verían la hoja
+   y la presa de carne a la vez en todas las tarjetas. */
+.food-hover-icon svg[hidden] {
+  display: none;
+}
+
+.food-hover-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.25;
+}
+
+.food-hover-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.food-hover-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* =====================================================
+   Responsive — 3 breakpoints: desktop (base), tablet, mobile
+   Desktop: estilos base de arriba (> 1024px)
+   Tablet:  hasta 1024px  → cartas un poco más chicas, mismo grid
+   Mobile:  hasta 600px   → una sola columna
+   ===================================================== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  main {
+    padding: 16px 16px 48px;
+  }
+
+  #inventario {
+    gap: 20px;
+  }
+
+  .food-card {
+    width: 240px;
+    height: 370px;
+  }
+
+  .food-img-frame {
+    height: 160px;
+  }
+
+  .food-face--back {
+    padding: 26px 18px 26px;
+    gap: 10px;
+  }
+
+  .food-back-list {
+    gap: 15px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .site-header {
+    padding: 32px 16px 24px;
+  }
+
+  .site-header h1 {
+    font-size: 1.9rem;
+  }
+
+  #inventario {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .food-card {
+    width: 100%;
+    max-width: 320px;
+    height: 390px;
+  }
+
+  .food-img-frame {
+    height: 200px;
+  }
+
+  .food-back-list {
+    gap: 19px;
+  }
+}
+
+/* =====================================================
+   Modal de detalle (index.html)
+   ===================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 10;
+}
+
+/* Un solo selector [hidden] alcanza para ocultar el modal entero: no hace
+   falta una clase aparte, el atributo hidden nativo de HTML ya lo saca del
+   flujo (display: none automático). Acá solo se pisa el display para que,
+   cuando NO tenga hidden, se comporte como flex y no como bloque. */
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal-caja {
+  position: relative;
+  background: #fffdf8;
+  border-radius: 18px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* Botón de cerrar en la esquina superior derecha, flotando sobre la imagen
+   (position: absolute respecto de .modal-caja, que es position: relative). */
+.modal-cerrar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.modal-cerrar:hover {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.modal-imagen {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.modal-contenido {
+  padding: 22px 24px 26px;
+}
+
+.modal-nombre {
+  font-family: 'Fraunces', serif;
+  font-size: 1.4rem;
+  margin-bottom: 14px;
+}
+
+.modal-detalles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.modal-detalle-item dt {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+  margin-bottom: 2px;
+}
+
+.modal-detalle-item dd {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.modal-descripcion {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--texto-suave);
+  border-top: 1px solid #ece6d8;
+  padding-top: 14px;
+}
+
+/* =====================================================
+   Página de gestión (gestion.html)
+   ===================================================== */
+.gestion-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+
+.gestion-aside {
+  background: var(--noche);
+  border-radius: 14px;
+  padding: 16px 12px;
+  align-self: start;
+}
+
+.gestion-menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gestion-menu a {
+  display: block;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.gestion-menu a:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.gestion-main {
+  background: #fffdf8;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 6px 18px rgba(58, 45, 30, 0.1);
+}
+
+.gestion-main h2 {
+  font-family: 'Fraunces', serif;
+  margin-bottom: 16px;
+}
+
+/* Solo se ve el panel cuyo id está en la URL (#crear, #editar...).
+   Si no hay ninguno elegido, se muestra "listar" por defecto. */
+.gestion-panel {
+  display: none;
+}
+
+.gestion-panel:target,
+.gestion-main:not(:has(.gestion-panel:target)) #listar {
+  display: block;
+}
+
+.gestion-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 480px;
+}
+
+.gestion-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.gestion-form .gestion-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.gestion-form input,
+.gestion-form select,
+.gestion-form textarea {
+  font: inherit;
+  font-weight: 400;
+  padding: 8px 10px;
+  border: 1px solid #d8d2c4;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.gestion-form button {
+  align-self: flex-start;
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  background: var(--azul);
+  color: #fff;
+  cursor: pointer;
+}
+
+.gestion-form .gestion-btn-peligro {
+  background: var(--rojo);
+}
+
+.gestion-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.gestion-tabla th,
+.gestion-tabla td {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid #ece6d8;
+}
+
+.gestion-tabla th {
+  background: var(--amarillo-pastel);
+}
+
+/* En pantallas chicas el aside pasa arriba del contenido. */
+@media (max-width: 700px) {
+  .gestion-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .gestion-main {
+    overflow-x: auto;
+  }
+}
+
+/* ----- Panel de login ----- */
+.login-panel {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px 60px;
+}
+
+.login-form {
+  width: 100%;
+  max-width: 320px;
+  background: #fffdf8;
+  border-radius: 14px;
+  padding: 28px 24px;
+  box-shadow: 0 6px 18px rgba(58, 45, 30, 0.1);
+}
+
+.login-form h2 {
+  font-family: 'Fraunces', serif;
+  margin-bottom: 6px;
+}
+
+.login-error {
+  color: var(--rojo);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
