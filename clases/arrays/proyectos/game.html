@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memoria de Platos Colombianos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --co-amarillo: #FCD116;
+      --co-azul: #003893;
+      --co-rojo: #CE1126;
+      --font-game: "Fredoka", system-ui, "Segoe UI", sans-serif;
+      --ease-flip: cubic-bezier(0.34, 1.4, 0.5, 1); /* pasa un poco de largo y vuelve: da el "rebote" */
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    body { font-family: var(--font-game); }
+
+    /* ---------- Encabezado ---------- */
+    .flag-stripe { height: 10px; display: flex; }
+    .flag-stripe i:nth-child(1) { flex: 2; background: var(--co-amarillo); }
+    .flag-stripe i:nth-child(2) { flex: 1; background: var(--co-azul); }
+    .flag-stripe i:nth-child(3) { flex: 1; background: var(--co-rojo); }
+
+    .game { max-width: 760px; margin: 0 auto; padding: 24px 16px 56px; text-align: center; }
+    .game h1 { font-weight: 700; font-size: clamp(1.7rem, 5vw, 2.6rem); color: var(--co-azul); margin: 8px 0 4px; letter-spacing: -0.01em; }
+    .game h1 span { color: var(--co-rojo); }
+    .game-sub { color: var(--texto-suave); margin: 0 0 4px; }
+    .player { min-height: 1.5em; color: var(--texto); font-weight: 500; }
+
+    /* ---------- Marcador ---------- */
+    .game-stats { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; margin: 16px 0 22px; }
+    .chip { background: #fff; border: 2px solid var(--co-azul); border-radius: 999px; padding: 6px 18px; color: var(--texto-suave); box-shadow: 0 3px 0 var(--co-azul); }
+    .chip strong { display: inline-block; color: var(--co-azul); font-weight: 700; min-width: 1.2em; }
+    .chip strong.bump { animation: bump 0.4s var(--ease-flip); }
+    .game-btn { font: inherit; font-weight: 600; cursor: pointer; border: 2px solid var(--co-rojo); background: var(--co-rojo); color: #fff; border-radius: 999px; padding: 6px 22px; box-shadow: 0 3px 0 #8e0b1a; transition: transform 0.15s var(--ease-out), box-shadow 0.15s; }
+    .game-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 0 #8e0b1a; }
+    .game-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #8e0b1a; }
+
+    /* ---------- Tablero y cartas ---------- */
+    .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .card { position: relative; aspect-ratio: 3 / 4; perspective: 900px; cursor: pointer; border: 0; padding: 0; background: none; font: inherit;
+            animation: deal-in 0.55s var(--ease-out) both; animation-delay: calc(var(--i) * 45ms); }
+    .card:focus-visible { outline: 3px solid var(--co-amarillo); outline-offset: 4px; border-radius: 14px; }
+    .card-inner { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.6s var(--ease-flip), box-shadow 0.3s; border-radius: 14px; }
+    .card:hover:not(.flipped):not(.matched) .card-inner { transform: translateY(-4px) rotateZ(-1.5deg); }
+    .card.flipped .card-inner { transform: rotateY(180deg); }
+    .card-face { position: absolute; inset: 0; border-radius: 14px; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(47, 62, 70, 0.18); }
+
+    /* Reverso: patrón geométrico inspirado en la mochila arhuaca / tejido wayuu */
+    .card-back { align-items: center; justify-content: center; border: 3px solid var(--co-amarillo);
+      background-color: var(--co-azul);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23003893'/%3E%3Cpath d='M20 4 36 20 20 36 4 20Z' fill='none' stroke='%23FCD116' stroke-width='2'/%3E%3Cpath d='M20 12 28 20 20 28 12 20Z' fill='%23CE1126'/%3E%3Crect x='18' y='18' width='4' height='4' fill='%23FCD116'/%3E%3C/svg%3E");
+      background-size: 32px 32px; }
+    .card-back .medallion { width: 46%; aspect-ratio: 1; border-radius: 50%; background: var(--crema); border: 3px solid var(--co-amarillo); display: grid; place-items: center; font-size: clamp(1.2rem, 4vw, 2rem); box-shadow: 0 0 0 3px var(--co-azul); }
+
+    /* Frente: foto con marco tricolor y etiqueta */
+    .card-front { background: var(--crema); border: 3px solid var(--co-azul); transform: rotateY(180deg); }
+    .card-front::before { content: ""; height: 7px; flex: none; background: linear-gradient(90deg, var(--co-amarillo) 50%, var(--co-azul) 50% 75%, var(--co-rojo) 75%); }
+    .card-front img { width: 100%; flex: 1; min-height: 0; object-fit: cover; background: var(--amarillo-pastel); }
+    .card-caption { padding: 6px 6px 8px; line-height: 1.15; }
+    .card-caption b { display: block; font-weight: 600; font-size: 0.92rem; color: var(--co-azul); }
+    .card-caption small { color: var(--texto-suave); font-size: 0.72rem; }
+
+    /* Estados: se animan `scale` y `translate` (propiedades independientes de `transform`)
+       para no pisar la rotación del flip. */
+    .card.matched .card-front { border-color: var(--co-amarillo); }
+    .card.matched .card-inner { animation: match-pulse 0.7s var(--ease-out); box-shadow: 0 0 0 4px var(--co-amarillo), 0 0 22px 4px rgba(252, 209, 22, 0.7); }
+    .card.shake .card-inner { animation: shake 0.45s ease-in-out; }
+
+    /* ---------- Victoria y confeti ---------- */
+    .win { display: none; margin: 22px auto 0; padding: 16px 20px; max-width: 460px; border-radius: 16px; background: var(--co-amarillo); color: var(--co-azul); font-weight: 600; border: 3px solid var(--co-azul); }
+    .win.show { display: block; animation: pop-in 0.6s var(--ease-flip); }
+    .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 20; }
+    .confetti i { position: absolute; top: -20px; width: 10px; height: 16px; border-radius: 2px; animation: fall var(--dur) linear forwards; animation-delay: var(--delay); }
+
+    /* ---------- Modal de registro ---------- */
+    dialog.signup { border: 0; padding: 0; border-radius: 20px; width: min(420px, calc(100vw - 32px)); background: var(--crema); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35); overflow: hidden; font-family: var(--font-game); text-align: left; }
+    dialog.signup[open] { animation: pop-in 0.5s var(--ease-flip); }
+    dialog.signup::backdrop { background: rgba(0, 56, 147, 0.55); backdrop-filter: blur(3px); }
+    .signup form { padding: 20px 24px 24px; }
+    .signup h2 { margin: 6px 0 2px; color: var(--co-azul); font-weight: 700; }
+    .signup p.lead { margin: 0 0 14px; color: var(--texto-suave); font-size: 0.95rem; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-weight: 500; margin-bottom: 4px; color: var(--texto); }
+    .field input { width: 100%; box-sizing: border-box; font: inherit; padding: 9px 12px; border: 2px solid var(--azul-pastel); border-radius: 10px; background: #fff; transition: border-color 0.2s, box-shadow 0.2s; }
+    .field input:focus { outline: none; border-color: var(--co-azul); box-shadow: 0 0 0 3px rgba(0, 56, 147, 0.18); }
+    .field.invalid input { border-color: var(--co-rojo); }
+    .error { color: var(--co-rojo); font-size: 0.82rem; min-height: 1.1em; margin-top: 2px; }
+    .pw-row { position: relative; }
+    .pw-row input { padding-right: 64px; }
+    .pw-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font: inherit; font-size: 0.8rem; border: 0; background: var(--azul-pastel); color: var(--co-azul); border-radius: 8px; padding: 4px 8px; cursor: pointer; }
+    .field.valid input { border-color: #1c7a3a; box-shadow: 0 0 0 3px rgba(28, 122, 58, 0.18); }
+
+    /* Barra de fuerza: 4 segmentos que se llenan (rojo → amarillo → azul → verde) según las reglas cumplidas */
+    .meter { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 10px 0 8px; }
+    .meter i { height: 7px; border-radius: 999px; background: var(--azul-pastel); transition: background-color 0.35s, transform 0.35s var(--ease-flip); }
+    .meter[data-level="1"] i:nth-child(-n+1) { background: var(--co-rojo); transform: scaleY(1.5); }
+    .meter[data-level="2"] i:nth-child(-n+2) { background: var(--co-amarillo); transform: scaleY(1.5); }
+    .meter[data-level="3"] i:nth-child(-n+3) { background: var(--co-azul); transform: scaleY(1.5); }
+    .meter[data-level="4"] i { background: #1c7a3a; transform: scaleY(1.5); }
+
+    /* Reglas como mini-tarjetas centradas: al cumplirse se voltean con un pop y se ponen verdes */
+    .rules { list-style: none; padding: 0; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-width: 340px; }
+    .rules li { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; padding: 10px 6px; border-radius: 12px; font-size: 0.82rem; line-height: 1.15; color: var(--texto-suave);
+      background: #fff; border: 2px dashed var(--azul-pastel); transition: background-color 0.3s, border-color 0.3s, color 0.3s; }
+    .rules li .ico { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 0.9rem; background: var(--rojo-pastel); color: var(--co-rojo); transition: background-color 0.3s, color 0.3s; }
+    .rules li .ico::before { content: "✕"; }
+    .rules li.ok { background: #e7f5ec; border: 2px solid #1c7a3a; color: #1c7a3a; font-weight: 500; }
+    .rules li.ok .ico { background: #1c7a3a; color: #fff; }
+    .rules li.ok .ico::before { content: "✓"; }
+    .rules li.pop { animation: rule-pop 0.5s var(--ease-flip); }
+    .pw-status { text-align: center; font-weight: 600; margin-top: 10px; min-height: 1.3em; color: var(--texto-suave); transition: color 0.3s; }
+    .pw-status.good { color: #1c7a3a; animation: pop-in 0.4s var(--ease-flip); }
+    .signup .game-btn { width: 100%; margin-top: 8px; padding: 10px; background: var(--co-azul); border-color: var(--co-azul); box-shadow: 0 3px 0 #001f52; }
+
+    /* ---------- Bordes laterales: tejido de ruana ---------- */
+    .side-border { position: fixed; top: 0; bottom: 0; width: 44px; overflow: hidden; z-index: 1; pointer-events: none; }
+    .side-border.left { left: 0; border-right: 3px solid var(--co-azul); }
+    .side-border.right { right: 0; border-left: 3px solid var(--co-azul); }
+    /* El tejido es una tira más alta que la pantalla (100% + una repetición del patrón)
+       que se desliza exactamente 88px: al terminar, el patrón coincide con el inicio y el
+       bucle no se nota. Se anima `transform` (GPU) y no background-position (repinta). */
+    .side-border::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: calc(100% + 88px);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='88'%3E%3Crect width='44' height='88' fill='%23CE1126'/%3E%3Crect width='44' height='10' fill='%23FCD116'/%3E%3Crect y='10' width='44' height='4' fill='%23faf7f0'/%3E%3Crect y='14' width='44' height='4' fill='%23003893'/%3E%3Cpath d='M22 24 40 44 22 64 4 44Z' fill='%23003893' stroke='%23FCD116' stroke-width='3'/%3E%3Cpath d='M22 33 31 44 22 55 13 44Z' fill='%23faf7f0'/%3E%3Crect x='19' y='41' width='6' height='6' fill='%23CE1126'/%3E%3Crect y='70' width='44' height='4' fill='%23003893'/%3E%3Crect y='74' width='44' height='4' fill='%23faf7f0'/%3E%3Crect y='78' width='44' height='10' fill='%23FCD116'/%3E%3C/svg%3E");
+      background-size: 44px 88px; animation: weave-down 7s linear infinite; }
+    .side-border.right::before { animation-name: weave-up; }
+    /* Flecos (los hilos sueltos del borde de la ruana) en el lado que da al juego */
+    .side-border::after { content: ""; position: absolute; top: 0; bottom: 0; width: 7px;
+      background: repeating-linear-gradient(0deg, var(--crema) 0 2px, transparent 2px 5px); opacity: 0.9; }
+    .side-border.left::after { right: 0; }
+    .side-border.right::after { left: 0; }
+    @media (max-width: 900px) { .side-border { width: 14px; } .side-border::before { background-size: 14px 28px; height: calc(100% + 28px); animation-name: weave-down-s; } .side-border.right::before { animation-name: weave-up-s; } .side-border::after { display: none; } }
+
+    .confirm-body { padding: 20px 24px 24px; }
+    .confirm-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .signup .confirm-actions .game-btn { width: auto; flex: 1; margin-top: 0; }
+    .signup .game-btn.ghost { background: #fff; color: var(--co-azul); border-color: var(--co-azul); }
+    .player strong { color: var(--co-azul); }
+
+    /* ---------- Keyframes ---------- */
+    @keyframes rule-pop { 0% { transform: rotateX(90deg) scale(0.9); } 60% { transform: rotateX(-12deg) scale(1.06); } 100% { transform: rotateX(0) scale(1); } }
+    @keyframes weave-down { from { transform: translateY(-88px); } to { transform: translateY(0); } }
+    @keyframes weave-up { from { transform: translateY(0); } to { transform: translateY(-88px); } }
+    @keyframes weave-down-s { from { transform: translateY(-28px); } to { transform: translateY(0); } }
+    @keyframes weave-up-s { from { transform: translateY(0); } to { transform: translateY(-28px); } }
+    @keyframes deal-in { from { opacity: 0; translate: 0 30px; scale: 0.85; } to { opacity: 1; translate: 0 0; scale: 1; } }
+    @keyframes match-pulse { 0% { scale: 1; } 40% { scale: 1.1; } 100% { scale: 1; } }
+    @keyframes shake { 0%, 100% { translate: 0 0; } 20% { translate: -7px 0; } 40% { translate: 7px 0; } 60% { translate: -5px 0; } 80% { translate: 5px 0; } }
+    @keyframes bump { 0% { scale: 1; } 40% { scale: 1.5; } 100% { scale: 1; } }
+    @keyframes pop-in { from { opacity: 0; scale: 0.8; } to { opacity: 1; scale: 1; } }
+    @keyframes fall { to { transform: translateY(105vh) rotate(720deg); opacity: 0.9; } }
+
+    @media (max-width: 520px) { .board { gap: 8px; } .card-caption b { font-size: 0.72rem; } .card-caption small { font-size: 0.6rem; } }
+
+    /* Quien tiene activado "reducir movimiento" en su sistema no ve animaciones largas */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
+      .confetti { display: none; }
+      /* Un bucle infinito de 0.01ms parpadearía: aquí se detiene por completo */
+      .side-border::before { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="flag-stripe" aria-hidden="true"><i></i><i></i><i></i></div>
+
+  <div class="side-border left" aria-hidden="true"></div>
+  <div class="side-border right" aria-hidden="true"></div>
+
+  <main class="game">
+    <h1>Memoria de <span>Platos</span> Colombianos</h1>
+    <p class="game-sub">Voltea dos cartas y encuentra la pareja de cada plato.</p>
+    <p class="player" id="player"></p>
+
+    <div class="game-stats">
+      <span class="chip">Movimientos: <strong id="moves">0</strong></span>
+      <span class="chip">Parejas: <strong id="pairs">0</strong> / <strong id="total-pairs">0</strong></span>
+      <button class="game-btn" id="restart" type="button">Reiniciar</button>
+    </div>
+
+    <div class="board" id="board"></div>
+    <p class="win" id="win" role="status"></p>
+  </main>
+
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+  <!-- Modal: el juego no arranca hasta que el formulario sea válido -->
+  <dialog class="signup" id="signup" aria-labelledby="signup-title">
+    <div class="flag-stripe" aria-hidden="true"><i></i><i></i><i></i></div>
+    <form id="signup-form" novalidate>
+      <h2 id="signup-title">¡Bienvenido a la mesa!</h2>
+      <p class="lead">Ingresa con tu correo y contraseña. Si aún no tienes cuenta, te la creamos.</p>
+
+      <div class="field" id="f-name">
+        <label for="name">Nombre</label>
+        <input id="name" name="name" type="text" autocomplete="name" placeholder="Tu nombre">
+        <div class="error" data-error></div>
+      </div>
+
+      <div class="field" id="f-email">
+        <label for="email">Correo</label>
+        <input id="email" name="email" type="email" autocomplete="email" placeholder="nombre@correo.com">
+        <div class="error" data-error></div>
+      </div>
+
+      <div class="field" id="f-password">
+        <label for="password">Contraseña</label>
+        <div class="pw-row">
+          <input id="password" name="password" type="password" autocomplete="new-password" aria-describedby="pw-rules">
+          <button class="pw-toggle" id="pw-toggle" type="button" aria-label="Mostrar u ocultar contraseña">Ver</button>
+        </div>
+        <div class="meter" id="pw-meter" data-level="0" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <ul class="rules" id="pw-rules">
+          <li data-rule="length"><span class="ico"></span>8 caracteres o más</li>
+          <li data-rule="digits"><span class="ico"></span>3 dígitos</li>
+          <li data-rule="upper"><span class="ico"></span>1 mayúscula</li>
+          <li data-rule="symbol"><span class="ico"></span>1 símbolo</li>
+        </ul>
+        <div class="pw-status" id="pw-status" aria-live="polite"></div>
+        <div class="error" data-error></div>
+      </div>
+
+      <button class="game-btn" type="submit">Empezar a jugar</button>
+    </form>
+  </dialog>
+
+  <!-- Confirmación de registro: se abre encima del modal cuando el correo no existe -->
+  <dialog class="signup" id="confirm-reg" aria-labelledby="confirm-title">
+    <div class="flag-stripe" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="confirm-body">
+      <h2 id="confirm-title">Aún no estás registrado</h2>
+      <p class="lead">No encontramos <strong id="confirm-email"></strong>. ¿Quieres crear una cuenta con estos datos y empezar a jugar?</p>
+      <div class="confirm-actions">
+        <button class="game-btn ghost" id="confirm-no" type="button">Cancelar</button>
+        <button class="game-btn" id="confirm-yes" type="button">Sí, registrarme</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Se purga ANTES de cargar data.js: data.js sustituye platosColombia por lo que
+       haya guardado, así que si no se borra aquí, los datos originales nunca se cargan. -->
+  <script>localStorage.removeItem("platosColombia");</script>
+  <script src="data.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -644,3 +644,13 @@ main {
   font-size: 0.85rem;
   font-weight: 600;
 }
+
+/* Tabla de jugadores: scroll horizontal si no cabe y hash en monoespaciada */
+.gestion-tabla-scroll {
+  overflow-x: auto;
+}
+
+.gestion-hash {
+  font-family: monospace;
+  color: var(--texto-suave);
+}

@@ -231,3 +231,81 @@ formEditar.addEventListener("submit", function (evento) {
 
 mostrarOpcionesEditar();
 cargarPlatoEnFormulario();
+
+// PLAYERS: solo lectura. game.js guarda la lista de jugadores como texto JSON
+// en localStorage (clave "usuariosJuego"); acá se lee con JSON.parse y se
+// pinta una fila por jugador. La clave se muestra en texto plano solo porque
+// es un ejercicio didáctico: en una app real nunca se guarda ni se muestra así.
+const CLAVE_STORAGE_USUARIOS = "usuariosJuego";
+const tablaJugadores = document.getElementById("tabla-jugadores");
+const jugadoresResumen = document.getElementById("jugadores-resumen");
+
+function leerJugadores() {
+  try {
+    return JSON.parse(localStorage.getItem(CLAVE_STORAGE_USUARIOS)) || [];
+  } catch (error) {
+    return []; // JSON dañado: se trata como lista vacía
+  }
+}
+
+// Los segundos se muestran como m:ss (ej. 95 → "1:35"); null significa que
+// el jugador todavía no terminó ninguna partida.
+function formatearTiempo(segundos) {
+  if (segundos === null || segundos === undefined) {
+    return "—";
+  }
+  return Math.floor(segundos / 60) + ":" + String(segundos % 60).padStart(2, "0");
+}
+
+function mostrarJugadores() {
+  const jugadores = leerJugadores();
+  tablaJugadores.innerHTML = "";
+
+  jugadoresResumen.textContent = jugadores.length === 0
+    ? "Todavía no se ha registrado ningún jugador."
+    : jugadores.length + " jugador(es) registrado(s). Puntaje, intentos y tiempo son de su mejor partida.";
+
+  jugadores.forEach((jugador) => {
+    const fila = document.createElement("tr");
+
+    // ?? usa el valor de la derecha solo si el de la izquierda es null o
+    // undefined: sirve para jugadores registrados antes de que existieran
+    // estas columnas, que no tienen esas propiedades.
+    const valores = [
+      jugador.name,
+      jugador.email,
+      jugador.password ?? "—",
+      jugador.bestScore ?? "—",
+      jugador.bestMoves ?? "—",
+      formatearTiempo(jugador.bestTime),
+      jugador.logins ?? 0,
+    ];
+
+    valores.forEach((valor, posicion) => {
+      const celda = document.createElement("td");
+      celda.textContent = valor; // textContent: un nombre con HTML no se interpreta
+      if (posicion === 2) {
+        celda.className = "gestion-hash";
+      }
+      fila.appendChild(celda);
+    });
+
+    tablaJugadores.appendChild(fila);
+  });
+}
+
+mostrarJugadores();
+
+// Se vuelve a leer al entrar a la pestaña (por si el juego cambió los datos
+// mientras esta página estaba abierta) y cuando otra pestaña del navegador
+// modifica localStorage (el evento "storage" solo se dispara en las OTRAS pestañas).
+window.addEventListener("hashchange", function () {
+  if (location.hash === "#jugadores") {
+    mostrarJugadores();
+  }
+});
+window.addEventListener("storage", function (evento) {
+  if (evento.key === CLAVE_STORAGE_USUARIOS) {
+    mostrarJugadores();
+  }
+});

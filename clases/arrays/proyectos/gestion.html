@@ -42,6 +42,7 @@
         <li><a href="#crear">Crear plato</a></li>
         <li><a href="#editar">Editar plato</a></li>
         <li><a href="#eliminar">Eliminar plato</a></li>
+        <li><a href="#jugadores">Jugadores</a></li>
       </ul>
     </nav>
   </aside>
@@ -134,6 +135,29 @@
         </thead>
         <tbody id="tabla-eliminar"></tbody>
       </table>
+    </section>
+
+    <!-- PLAYERS: solo lectura. Los datos los escribe game.js en localStorage
+         (clave "usuariosJuego"); acá únicamente se leen y se muestran. -->
+    <section id="jugadores" class="gestion-panel">
+      <h2>Jugadores</h2>
+      <p id="jugadores-resumen"></p>
+      <div class="gestion-tabla-scroll">
+        <table class="gestion-tabla">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Clave</th>
+              <th>Puntaje</th>
+              <th>Intentos</th>
+              <th>Tiempo</th>
+              <th>Ingresos</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-jugadores"></tbody>
+        </table>
+      </div>
     </section>
 
   </main>
