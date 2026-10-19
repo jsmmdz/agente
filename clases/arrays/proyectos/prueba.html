@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Prueba Supabase</title>
+  <!-- CDN: va ANTES de nuestros scripts; sin esta línea, "supabase.createClient"
+       no existiría cuando supabaseClient.js intente usarlo -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <button id="btn-traer">Traer platos</button>
+  <div id="resultado"></div>
+
+  <!-- supabaseClient.js crea "db"; prueba.js lo usa, por eso va antes -->
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/prueba.js"></script>
+</body>
+</html>
