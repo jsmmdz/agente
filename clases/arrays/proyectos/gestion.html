@@ -11,6 +11,7 @@
 <header class="site-header">
   <h1>Gestión de platos</h1>
   <p class="subtitle">Crear, consultar, editar y eliminar platos del inventario</p>
+  <span id="estado-conexion" class="estado">Conectando...</span>
 </header>
 
 <!--
@@ -38,10 +39,8 @@
   <aside class="gestion-aside">
     <nav>
       <ul class="gestion-menu">
-        <li><a href="#listar">Listar platos</a></li>
-        <li><a href="#crear">Crear plato</a></li>
-        <li><a href="#editar">Editar plato</a></li>
-        <li><a href="#eliminar">Eliminar plato</a></li>
+        <li><a href="#listar">Platos</a></li>
+        <li><a href="#crear">Crear / editar</a></li>
         <li><a href="#jugadores">Jugadores</a></li>
       </ul>
     </nav>
@@ -49,26 +48,37 @@
 
   <main class="gestion-main">
 
-    <!-- READ -->
+    <!-- LISTAR + BUSCAR + EDITAR + ELIMINAR (READ / UPDATE / DELETE):
+         una sola tabla; cada fila trae sus botones de acción. -->
     <section id="listar" class="gestion-panel">
-      <h2>Listar platos</h2>
-      <table class="gestion-tabla">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Región</th>
-            <th>Tiempo (min)</th>
-            <th>Vegetariano</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-platos"></tbody>
-      </table>
+      <div class="gestion-barra">
+        <h2>Listar platos</h2>
+        <input type="search" id="buscar" placeholder="Buscar por nombre, región o sabor...">
+      </div>
+      <div class="gestion-tabla-scroll">
+        <table class="gestion-tabla">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Región</th>
+              <th>Tiempo (min)</th>
+              <th>Vegetariano</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-platos">
+            <tr><td colspan="5" class="vacio">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
-    <!-- CREATE -->
+    <!-- CREAR / EDITAR (CREATE / UPDATE): un solo formulario. Si #plato-id
+         tiene valor, gestion.js actualiza ese plato; si está vacío, crea uno. -->
     <section id="crear" class="gestion-panel">
-      <h2>Crear plato</h2>
-      <form id="form-crear" class="gestion-form">
+      <h2 id="titulo-formulario">Crear plato</h2>
+      <form id="form-plato" class="gestion-form" autocomplete="off">
+        <input type="hidden" id="plato-id">
         <label>Nombre
           <input type="text" name="nombre" required>
         </label>
@@ -87,54 +97,9 @@
         <label>Sabores dominantes (separados por coma)
           <input type="text" name="saboresDominantes" placeholder="Dulce, Salado, Crocante">
         </label>
-        <button type="submit">Guardar plato</button>
+        <button type="submit" id="btn-guardar">Guardar plato</button>
+        <button type="button" id="btn-cancelar" class="gestion-btn-secundario" hidden>Cancelar edición</button>
       </form>
-    </section>
-
-    <!-- UPDATE -->
-    <section id="editar" class="gestion-panel">
-      <h2>Editar plato</h2>
-      <form id="form-editar" class="gestion-form">
-        <label>Plato a editar
-          <select name="platoSeleccionado" id="select-editar"></select>
-        </label>
-        <label>Nombre
-          <input type="text" name="nombre">
-        </label>
-        <label>Región
-          <input type="text" name="region">
-        </label>
-        <label>Tiempo de preparación (min)
-          <input type="number" name="tiempoPreparacionMin" min="1">
-        </label>
-        <label class="gestion-check">
-          <input type="checkbox" name="esVegetariano"> Es vegetariano
-        </label>
-        <label>Descripción breve
-          <textarea name="descripcionBreve" rows="3"></textarea>
-        </label>
-        <label>Sabores dominantes (separados por coma)
-          <input type="text" name="saboresDominantes">
-        </label>
-        <button type="submit">Actualizar plato</button>
-      </form>
-    </section>
-
-    <!-- DELETE -->
-    <section id="eliminar" class="gestion-panel">
-      <h2>Eliminar plato</h2>
-      <table class="gestion-tabla">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Región</th>
-            <th>Tiempo (min)</th>
-            <th>Vegetariano</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-eliminar"></tbody>
-      </table>
     </section>
 
     <!-- PLAYERS: solo lectura. Los datos los escribe game.js en localStorage
@@ -163,11 +128,13 @@
   </main>
 </div>
 
+<div id="mensaje" class="mensaje" hidden></div>
+
 <!-- Supabase (guía semana 11, 4.2): el CDN crea el global "supabase"; va antes de cualquier script propio -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="CREDENCIALES.JS"></script>
 <script src="js/supabaseClient.js"></script>
-<script src="js/crudPlatos.js"></script>
+<script src="js/datos.js"></script>
 <script src="gestion.js"></script>
 </body>
 </html>

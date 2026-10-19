@@ -654,3 +654,83 @@ main {
   font-family: monospace;
   color: var(--texto-suave);
 }
+
+/* ----- Gestión: buscador, estado de conexión, mensajes y acciones ----- */
+.gestion-barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gestion-barra input[type="search"] {
+  flex: 1 1 220px;
+  max-width: 340px;
+  padding: 8px 10px;
+  border: 1px solid var(--azul-pastel);
+  border-radius: 6px;
+  font: inherit;
+}
+
+.estado {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  background: var(--amarillo-pastel);
+  color: var(--texto);
+}
+
+.estado.conectado { background: #cfe8d5; }
+.estado.error { background: var(--rojo-pastel); }
+
+.mensaje {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  max-width: 320px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--noche);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  z-index: 50;
+}
+
+.mensaje[hidden] { display: none; }
+.mensaje.error { background: var(--rojo); }
+
+.celda-acciones { white-space: nowrap; }
+
+.celda-acciones button {
+  padding: 4px 10px;
+  margin-right: 4px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--azul);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.celda-acciones .gestion-btn-peligro { background: var(--rojo); }
+
+.gestion-form .gestion-btn-secundario {
+  background: transparent;
+  color: var(--texto);
+  border: 1px solid var(--texto-suave);
+}
+
+.vacio {
+  text-align: center;
+  color: var(--texto-suave);
+}
+
+/* display:grid / flex anulan el atributo hidden: sin esto el panel de gestión
+   se veía aunque no se hubiera iniciado sesión. */
+.gestion-layout[hidden],
+.login-panel[hidden] {
+  display: none;
+}

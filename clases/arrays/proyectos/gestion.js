@@ -22,36 +22,55 @@ formLogin.addEventListener("submit", function (evento) {
   }
 });
 
-const tablaPlatos = document.getElementById("tabla-platos");
-const tablaEliminar = document.getElementById("tabla-eliminar");
-const formCrear = document.getElementById("form-crear");
-const formEditar = document.getElementById("form-editar");
-const selectEditar = document.getElementById("select-editar");
+// =============================================
+// PLATOS: lógica de la interfaz (usa el objeto Datos de datos.js).
+// Mismo patrón de pantalla: un solo formulario que sirve para crear y editar,
+// buscador, mensajes de éxito/error y estado de la conexión.
+// =============================================
+const form = document.getElementById("form-plato");
+const inputId = document.getElementById("plato-id");
+const tituloFormulario = document.getElementById("titulo-formulario");
+const btnGuardar = document.getElementById("btn-guardar");
+const btnCancelar = document.getElementById("btn-cancelar");
+const tbody = document.getElementById("tabla-platos");
+const buscador = document.getElementById("buscar");
+const estado = document.getElementById("estado-conexion");
+const mensaje = document.getElementById("mensaje");
 
 // "platos" es una copia local de lo que hay en Supabase. Se vuelve a pedir
-// (recargarPlatos) después de cada CREATE / UPDATE / DELETE, así la pantalla
-// siempre refleja la base de datos real y no un array que pudo quedar viejo.
-// Cada plato se identifica por su id de la base de datos (no por su posición).
+// (cargarPlatos) después de cada CREATE / UPDATE / DELETE, así la pantalla
+// siempre refleja la base de datos real. Cada plato se identifica por su id
+// (no por su posición en el array).
 let platos = [];
 
-async function recargarPlatos() {
-  const lista = await listarPlatos();
-  if (!lista) {
-    alert("No se pudieron cargar los platos. Revisa la consola.");
-    return;
-  }
-  platos = lista;
-  mostrarPlatos();
-  mostrarEliminar();
-  mostrarOpcionesEditar();
-  cargarPlatoEnFormulario();
+// ---------- Utilidades ----------
+function mostrarMensaje(texto, tipo = "ok") {
+  mensaje.textContent = texto;
+  mensaje.className = `mensaje ${tipo}`;
+  mensaje.hidden = false;
+  setTimeout(() => { mensaje.hidden = true; }, 3000);
+}
+
+// Convierte un texto en HTML seguro: un nombre como "<b>x</b>" se muestra tal
+// cual en vez de interpretarse. Se usa porque la tabla se arma con innerHTML.
+function escaparHTML(texto) {
+  const div = document.createElement("div");
+  div.textContent = texto ?? "";
+  return div.innerHTML;
+}
+
+function limpiarFormulario() {
+  form.reset();
+  inputId.value = "";
+  tituloFormulario.textContent = "Crear plato";
+  btnGuardar.textContent = "Guardar plato";
+  btnCancelar.hidden = true;
 }
 
 // Lee el formulario y arma el objeto con la misma forma que las columnas de
-// la tabla. No lleva id: Postgres lo genera al insertar. FormData lee los
-// campos por su atributo "name".
-function leerFormulario(formulario) {
-  const datos = new FormData(formulario);
+// la tabla. No lleva id: Postgres lo genera al insertar.
+function leerFormulario() {
+  const datos = new FormData(form);
   return {
     nombre: datos.get("nombre").trim(),
     region: datos.get("region").trim(),
@@ -69,172 +88,134 @@ function leerFormulario(formulario) {
   };
 }
 
-// READ: arma una fila de tabla por cada plato de la lista.
-function mostrarPlatos() {
-  tablaPlatos.innerHTML = "";
+// ---------- Renderizado ----------
+function renderizarTabla(lista) {
+  if (!lista.length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="vacio">No hay platos</td></tr>`;
+    return;
+  }
 
-  platos.forEach((plato) => {
-    const fila = document.createElement("tr");
-
-    const celdaNombre = document.createElement("td");
-    celdaNombre.textContent = plato.nombre;
-
-    const celdaRegion = document.createElement("td");
-    celdaRegion.textContent = plato.region;
-
-    const celdaTiempo = document.createElement("td");
-    celdaTiempo.textContent = plato.tiempoPreparacionMin;
-
-    const celdaVegetariano = document.createElement("td");
-    celdaVegetariano.textContent = plato.esVegetariano ? "Sí" : "No";
-
-    fila.append(celdaNombre, celdaRegion, celdaTiempo, celdaVegetariano);
-    tablaPlatos.appendChild(fila);
-  });
+  tbody.innerHTML = lista.map((p) => `
+    <tr>
+      <td>${escaparHTML(p.nombre)}</td>
+      <td>${escaparHTML(p.region)}</td>
+      <td>${escaparHTML(String(p.tiempoPreparacionMin))}</td>
+      <td>${p.esVegetariano ? "Sí" : "No"}</td>
+      <td class="celda-acciones">
+        <button type="button" data-id="${p.id}" data-accion="editar">Editar</button>
+        <button type="button" class="gestion-btn-peligro" data-id="${p.id}" data-accion="eliminar">Eliminar</button>
+      </td>
+    </tr>
+  `).join("");
 }
 
-// CREATE: el listener es async para poder esperar (await) a que Supabase
-// confirme el insert antes de refrescar la pantalla.
-formCrear.addEventListener("submit", async function (evento) {
+// Filtra la copia local (no consulta de nuevo a Supabase) por nombre, región
+// o sabores, sin distinguir mayúsculas.
+function filtrar() {
+  const texto = buscador.value.trim().toLowerCase();
+  const filtrados = platos.filter((p) =>
+    [p.nombre, p.region, (p.saboresDominantes || []).join(" ")]
+      .some((v) => (v || "").toLowerCase().includes(texto))
+  );
+  renderizarTabla(filtrados);
+}
+
+// ---------- Operaciones ----------
+async function cargarPlatos() {
+  try {
+    platos = await Datos.listar();
+    filtrar();
+    estado.textContent = "● Conectado";
+    estado.className = "estado conectado";
+  } catch (err) {
+    console.error(err);
+    estado.textContent = "● Sin conexión";
+    estado.className = "estado error";
+    tbody.innerHTML = `<tr><td colspan="5" class="vacio">Error al cargar: ${escaparHTML(err.message)}</td></tr>`;
+  }
+}
+
+async function guardar(evento) {
   // preventDefault evita que el navegador recargue la página al enviar el
   // formulario, que es el comportamiento por defecto de <form>.
   evento.preventDefault();
 
-  const nuevo = await agregarPlato(leerFormulario(formCrear));
-  if (!nuevo) {
-    alert("No se pudo agregar el plato. Revisa la consola.");
-    return;
-  }
+  const registro = leerFormulario();
 
-  formCrear.reset();
-  await recargarPlatos();
-});
-
-// DELETE: listado igual al de READ pero con un botón "Eliminar" por fila. El
-// botón guarda el id del plato en data-id; eliminarPlato(id) borra esa fila
-// de la base de datos.
-function mostrarEliminar() {
-  tablaEliminar.innerHTML = "";
-
-  platos.forEach((plato) => {
-    const fila = document.createElement("tr");
-
-    const celdaNombre = document.createElement("td");
-    celdaNombre.textContent = plato.nombre;
-
-    const celdaRegion = document.createElement("td");
-    celdaRegion.textContent = plato.region;
-
-    const celdaTiempo = document.createElement("td");
-    celdaTiempo.textContent = plato.tiempoPreparacionMin;
-
-    const celdaVegetariano = document.createElement("td");
-    celdaVegetariano.textContent = plato.esVegetariano ? "Sí" : "No";
-
-    const celdaAcciones = document.createElement("td");
-    const botonEliminar = document.createElement("button");
-    botonEliminar.type = "button";
-    botonEliminar.textContent = "Eliminar";
-    botonEliminar.className = "gestion-btn-peligro";
-    botonEliminar.dataset.id = plato.id;
-    celdaAcciones.appendChild(botonEliminar);
-
-    fila.append(celdaNombre, celdaRegion, celdaTiempo, celdaVegetariano, celdaAcciones);
-    tablaEliminar.appendChild(fila);
-  });
-}
-
-// Un solo listener en el <tbody> (delegación de eventos) en vez de uno por
-// botón: como las filas se recrean cada vez que se llama a mostrarEliminar(),
-// un listener puesto directo en cada botón se perdería al redibujar la
-// tabla. El <tbody> nunca se destruye, así que el listener sobrevive.
-tablaEliminar.addEventListener("click", async function (evento) {
-  if (evento.target.tagName !== "BUTTON") {
-    return;
-  }
-
-  const id = Number(evento.target.dataset.id);
-  const plato = platos.find((p) => p.id === id);
-
-  const confirmado = confirm(`¿Seguro que quieres eliminar "${plato.nombre}"?`);
-  if (!confirmado) {
-    return;
-  }
-
-  const seElimino = await eliminarPlato(id);
-  if (!seElimino) {
-    alert("No se pudo eliminar el plato. Revisa la consola.");
-    return;
-  }
-
-  await recargarPlatos();
-});
-
-// UPDATE: el <select> se llena con un <option> por plato (value = id del
-// plato). Elegir una opción precarga el formulario con los datos actuales;
-// enviar el formulario confirma y manda a Supabase solo ese plato.
-function mostrarOpcionesEditar() {
-  const seleccionado = selectEditar.value; // para no perder la selección al refrescar
-  selectEditar.innerHTML = "";
-
-  platos.forEach((plato) => {
-    const opcion = document.createElement("option");
-    opcion.value = plato.id;
-    opcion.textContent = plato.nombre;
-    selectEditar.appendChild(opcion);
-  });
-
-  if (seleccionado && platos.some((p) => String(p.id) === seleccionado)) {
-    selectEditar.value = seleccionado;
+  btnGuardar.disabled = true;
+  try {
+    if (inputId.value) {
+      // Al editar solo se mandan los campos del formulario: el id y la foto
+      // (imagen) que ya tenía el plato quedan intactos.
+      await Datos.actualizar(inputId.value, registro);
+      mostrarMensaje("Plato actualizado ✅");
+    } else {
+      await Datos.crear(registro);
+      mostrarMensaje("Plato creado ✅");
+    }
+    limpiarFormulario();
+    await cargarPlatos();
+    location.hash = "#listar";
+  } catch (err) {
+    console.error(err);
+    mostrarMensaje("Error: " + err.message, "error");
+  } finally {
+    btnGuardar.disabled = false;
   }
 }
 
-// Llena los demás campos del form con los datos del plato elegido. Se llama
-// al cambiar el select y después de cada recarga.
-function cargarPlatoEnFormulario() {
-  const plato = platos.find((p) => p.id === Number(selectEditar.value));
+// Carga el plato en el formulario único y salta al panel #crear.
+function editar(id) {
+  const p = platos.find((x) => String(x.id) === String(id));
+  if (!p) return;
 
-  if (!plato) {
-    return;
-  }
+  inputId.value = p.id;
+  form.nombre.value = p.nombre;
+  form.region.value = p.region;
+  form.tiempoPreparacionMin.value = p.tiempoPreparacionMin;
+  form.esVegetariano.checked = p.esVegetariano;
+  form.descripcionBreve.value = p.descripcionBreve;
+  form.saboresDominantes.value = (p.saboresDominantes || []).join(", ");
 
-  formEditar.nombre.value = plato.nombre;
-  formEditar.region.value = plato.region;
-  formEditar.tiempoPreparacionMin.value = plato.tiempoPreparacionMin;
-  formEditar.esVegetariano.checked = plato.esVegetariano;
-  formEditar.descripcionBreve.value = plato.descripcionBreve;
-  formEditar.saboresDominantes.value = plato.saboresDominantes.join(", ");
+  tituloFormulario.textContent = "Editar plato";
+  btnGuardar.textContent = "Actualizar plato";
+  btnCancelar.hidden = false;
+  location.hash = "#crear";
+  form.nombre.focus();
 }
 
-selectEditar.addEventListener("change", cargarPlatoEnFormulario);
+async function eliminar(id) {
+  const p = platos.find((x) => String(x.id) === String(id));
+  if (!confirm(`¿Seguro que quieres eliminar "${p ? p.nombre : "este plato"}"?`)) return;
 
-formEditar.addEventListener("submit", async function (evento) {
-  evento.preventDefault();
-
-  const id = Number(selectEditar.value);
-  const platoActual = platos.find((p) => p.id === id);
-
-  if (!platoActual) {
-    return;
+  try {
+    await Datos.eliminar(id);
+    mostrarMensaje("Plato eliminado 🗑️");
+    if (inputId.value === String(id)) limpiarFormulario();
+    await cargarPlatos();
+  } catch (err) {
+    console.error(err);
+    mostrarMensaje("Error: " + err.message, "error");
   }
+}
 
-  const confirmado = confirm(`¿Guardar los cambios de "${platoActual.nombre}"?`);
-  if (!confirmado) {
-    return;
-  }
+// ---------- Eventos ----------
+form.addEventListener("submit", guardar);
+btnCancelar.addEventListener("click", limpiarFormulario);
+buscador.addEventListener("input", filtrar);
 
-  // modificarPlato manda solo los campos del formulario; el id y la foto
-  // (imagen) que ya tenía el plato quedan intactos.
-  const actualizado = await modificarPlato(id, leerFormulario(formEditar));
-  if (!actualizado) {
-    alert("No se pudo guardar el cambio. Revisa la consola.");
-    return;
-  }
-
-  await recargarPlatos();
+// Un solo listener en el <tbody> (delegación de eventos): las filas se
+// recrean cada vez que se llama a renderizarTabla(), y un listener puesto
+// directo en cada botón se perdería. El <tbody> nunca se destruye.
+tbody.addEventListener("click", (e) => {
+  const boton = e.target.closest("button[data-accion]");
+  if (!boton) return;
+  const { id, accion } = boton.dataset;
+  if (accion === "editar") editar(id);
+  if (accion === "eliminar") eliminar(id);
 });
 
-recargarPlatos();
+cargarPlatos();
 
 // PLAYERS: solo lectura. game.js guarda la lista de jugadores como texto JSON
 // en localStorage (clave "usuariosJuego"); acá se lee con JSON.parse y se

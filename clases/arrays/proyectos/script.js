@@ -5,11 +5,14 @@ const plantillaPlato = document.getElementById("plato-template");
 // la plantilla del HTML (el <template>, que no se ve en pantalla) y llenamos
 // sus huecos (.js-*) con los datos de ese plato. El HTML nunca tiene
 // tarjetas escritas a mano — todas nacen de este bucle.
-// listarPlatos() viene de js/crudPlatos.js; es async porque la consulta viaja
+// Datos.listar() viene de js/datos.js; es async porque la consulta viaja
 // por internet, así que todo el pintado espera (await) a que lleguen los datos.
 async function cargarVitrina() {
-  const platos = await listarPlatos();
-  if (!platos) {
+  let platos;
+  try {
+    platos = await Datos.listar();
+  } catch (err) {
+    console.error(err);
     inventarioEl.textContent = "No se pudieron cargar los platos. Revisa la consola.";
     return;
   }
