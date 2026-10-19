@@ -3,6 +3,16 @@
 
 const TABLA = 'platos';
 
+// READ de todos — order('id') mantiene siempre el mismo orden en pantalla
+async function listarPlatos() {
+  const { data, error } = await db.from(TABLA).select('*').order('id');
+  if (error) {
+    console.log("Error al listar:", error);
+    return null;
+  }
+  return data;
+}
+
 // CREATE — insert() recibe un ARRAY; .select() devuelve la fila creada (con su id).
 // El id lo genera Postgres, por eso "datos" no lo trae.
 async function agregarPlato(datos) {

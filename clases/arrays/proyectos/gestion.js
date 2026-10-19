@@ -23,13 +23,57 @@ formLogin.addEventListener("submit", function (evento) {
 });
 
 const tablaPlatos = document.getElementById("tabla-platos");
+const tablaEliminar = document.getElementById("tabla-eliminar");
+const formCrear = document.getElementById("form-crear");
+const formEditar = document.getElementById("form-editar");
+const selectEditar = document.getElementById("select-editar");
 
-// READ: recorre platosColombia (de data.js) y arma una fila de tabla por
-// cada plato. No modifica el array, solo lo lee para pintar el DOM.
+// "platos" es una copia local de lo que hay en Supabase. Se vuelve a pedir
+// (recargarPlatos) después de cada CREATE / UPDATE / DELETE, así la pantalla
+// siempre refleja la base de datos real y no un array que pudo quedar viejo.
+// Cada plato se identifica por su id de la base de datos (no por su posición).
+let platos = [];
+
+async function recargarPlatos() {
+  const lista = await listarPlatos();
+  if (!lista) {
+    alert("No se pudieron cargar los platos. Revisa la consola.");
+    return;
+  }
+  platos = lista;
+  mostrarPlatos();
+  mostrarEliminar();
+  mostrarOpcionesEditar();
+  cargarPlatoEnFormulario();
+}
+
+// Lee el formulario y arma el objeto con la misma forma que las columnas de
+// la tabla. No lleva id: Postgres lo genera al insertar. FormData lee los
+// campos por su atributo "name".
+function leerFormulario(formulario) {
+  const datos = new FormData(formulario);
+  return {
+    nombre: datos.get("nombre").trim(),
+    region: datos.get("region").trim(),
+    tiempoPreparacionMin: Number(datos.get("tiempoPreparacionMin")),
+    esVegetariano: datos.get("esVegetariano") === "on",
+    descripcionBreve: datos.get("descripcionBreve").trim(),
+    // El input llega como un solo string "Dulce, Salado" y hay que separarlo
+    // en array: split por coma, trim a cada sabor y filter para descartar
+    // strings vacíos si el campo se dejó en blanco o con comas de más.
+    saboresDominantes: datos
+      .get("saboresDominantes")
+      .split(",")
+      .map((sabor) => sabor.trim())
+      .filter((sabor) => sabor !== ""),
+  };
+}
+
+// READ: arma una fila de tabla por cada plato de la lista.
 function mostrarPlatos() {
   tablaPlatos.innerHTML = "";
 
-  platosColombia.forEach((plato) => {
+  platos.forEach((plato) => {
     const fila = document.createElement("tr");
 
     const celdaNombre = document.createElement("td");
@@ -49,55 +93,30 @@ function mostrarPlatos() {
   });
 }
 
-mostrarPlatos();
-
-// CREATE: toma los valores del formulario, arma un objeto plato con la misma
-// forma que los de data.js y lo agrega al array con push. FormData lee los
-// campos por su atributo "name", por eso los inputs del form se llaman igual
-// que las propiedades del objeto (nombre, region, etc.).
-const formCrear = document.getElementById("form-crear");
-
-formCrear.addEventListener("submit", function (evento) {
+// CREATE: el listener es async para poder esperar (await) a que Supabase
+// confirme el insert antes de refrescar la pantalla.
+formCrear.addEventListener("submit", async function (evento) {
   // preventDefault evita que el navegador recargue la página al enviar el
   // formulario, que es el comportamiento por defecto de <form>.
   evento.preventDefault();
 
-  const datos = new FormData(formCrear);
+  const nuevo = await agregarPlato(leerFormulario(formCrear));
+  if (!nuevo) {
+    alert("No se pudo agregar el plato. Revisa la consola.");
+    return;
+  }
 
-  const nuevoPlato = {
-    nombre: datos.get("nombre").trim(),
-    region: datos.get("region").trim(),
-    tiempoPreparacionMin: Number(datos.get("tiempoPreparacionMin")),
-    esVegetariano: datos.get("esVegetariano") === "on",
-    descripcionBreve: datos.get("descripcionBreve").trim(),
-    // El input llega como un solo string "Dulce, Salado" y hay que separarlo
-    // en array: split por coma, trim a cada sabor y filter para descartar
-    // strings vacíos si el campo se dejó en blanco o con comas de más.
-    saboresDominantes: datos
-      .get("saboresDominantes")
-      .split(",")
-      .map((sabor) => sabor.trim())
-      .filter((sabor) => sabor !== ""),
-  };
-
-  platosColombia.push(nuevoPlato);
-  guardarPlatos();
-  mostrarPlatos();
-  mostrarEliminar();
-  mostrarOpcionesEditar();
   formCrear.reset();
+  await recargarPlatos();
 });
 
-// DELETE: pinta un listado igual al de READ pero con un botón "Eliminar" por
-// fila. El botón guarda el índice del plato en data-index; splice(indice, 1)
-// es el método que saca un elemento del array en esa posición exacta (a
-// diferencia de pop/shift, que solo tocan los extremos).
-const tablaEliminar = document.getElementById("tabla-eliminar");
-
+// DELETE: listado igual al de READ pero con un botón "Eliminar" por fila. El
+// botón guarda el id del plato en data-id; eliminarPlato(id) borra esa fila
+// de la base de datos.
 function mostrarEliminar() {
   tablaEliminar.innerHTML = "";
 
-  platosColombia.forEach((plato, indice) => {
+  platos.forEach((plato) => {
     const fila = document.createElement("tr");
 
     const celdaNombre = document.createElement("td");
@@ -117,7 +136,7 @@ function mostrarEliminar() {
     botonEliminar.type = "button";
     botonEliminar.textContent = "Eliminar";
     botonEliminar.className = "gestion-btn-peligro";
-    botonEliminar.dataset.index = indice;
+    botonEliminar.dataset.id = plato.id;
     celdaAcciones.appendChild(botonEliminar);
 
     fila.append(celdaNombre, celdaRegion, celdaTiempo, celdaVegetariano, celdaAcciones);
@@ -129,53 +148,51 @@ function mostrarEliminar() {
 // botón: como las filas se recrean cada vez que se llama a mostrarEliminar(),
 // un listener puesto directo en cada botón se perdería al redibujar la
 // tabla. El <tbody> nunca se destruye, así que el listener sobrevive.
-tablaEliminar.addEventListener("click", function (evento) {
+tablaEliminar.addEventListener("click", async function (evento) {
   if (evento.target.tagName !== "BUTTON") {
     return;
   }
 
-  const indice = Number(evento.target.dataset.index);
-  const plato = platosColombia[indice];
+  const id = Number(evento.target.dataset.id);
+  const plato = platos.find((p) => p.id === id);
 
-  const confirmado = confirm(`¿Seguro que querés eliminar "${plato.nombre}"?`);
+  const confirmado = confirm(`¿Seguro que quieres eliminar "${plato.nombre}"?`);
   if (!confirmado) {
     return;
   }
 
-  platosColombia.splice(indice, 1);
-  guardarPlatos();
-  mostrarPlatos();
-  mostrarEliminar();
-  mostrarOpcionesEditar();
-  cargarPlatoEnFormulario();
+  const seElimino = await eliminarPlato(id);
+  if (!seElimino) {
+    alert("No se pudo eliminar el plato. Revisa la consola.");
+    return;
+  }
+
+  await recargarPlatos();
 });
 
-mostrarEliminar();
-
-// UPDATE: el <select> se llena con un <option> por plato (value = índice en
-// el array). Elegir una opción precarga el formulario con los datos actuales
-// de ese plato; enviar el formulario confirma con el usuario y reemplaza
-// esa posición del array con los valores nuevos, sin tocar los demás platos.
-const formEditar = document.getElementById("form-editar");
-const selectEditar = document.getElementById("select-editar");
-
+// UPDATE: el <select> se llena con un <option> por plato (value = id del
+// plato). Elegir una opción precarga el formulario con los datos actuales;
+// enviar el formulario confirma y manda a Supabase solo ese plato.
 function mostrarOpcionesEditar() {
+  const seleccionado = selectEditar.value; // para no perder la selección al refrescar
   selectEditar.innerHTML = "";
 
-  platosColombia.forEach((plato, indice) => {
+  platos.forEach((plato) => {
     const opcion = document.createElement("option");
-    opcion.value = indice;
+    opcion.value = plato.id;
     opcion.textContent = plato.nombre;
     selectEditar.appendChild(opcion);
   });
+
+  if (seleccionado && platos.some((p) => String(p.id) === seleccionado)) {
+    selectEditar.value = seleccionado;
+  }
 }
 
-// Llena los demás campos del form con los datos del plato en la posición
-// elegida. Se llama al cambiar el select y también apenas se listan las
-// opciones, para que el form arranque mostrando el primer plato.
+// Llena los demás campos del form con los datos del plato elegido. Se llama
+// al cambiar el select y después de cada recarga.
 function cargarPlatoEnFormulario() {
-  const indice = Number(selectEditar.value);
-  const plato = platosColombia[indice];
+  const plato = platos.find((p) => p.id === Number(selectEditar.value));
 
   if (!plato) {
     return;
@@ -191,11 +208,11 @@ function cargarPlatoEnFormulario() {
 
 selectEditar.addEventListener("change", cargarPlatoEnFormulario);
 
-formEditar.addEventListener("submit", function (evento) {
+formEditar.addEventListener("submit", async function (evento) {
   evento.preventDefault();
 
-  const indice = Number(selectEditar.value);
-  const platoActual = platosColombia[indice];
+  const id = Number(selectEditar.value);
+  const platoActual = platos.find((p) => p.id === id);
 
   if (!platoActual) {
     return;
@@ -206,31 +223,18 @@ formEditar.addEventListener("submit", function (evento) {
     return;
   }
 
-  const datos = new FormData(formEditar);
+  // modificarPlato manda solo los campos del formulario; el id y la foto
+  // (imagen) que ya tenía el plato quedan intactos.
+  const actualizado = await modificarPlato(id, leerFormulario(formEditar));
+  if (!actualizado) {
+    alert("No se pudo guardar el cambio. Revisa la consola.");
+    return;
+  }
 
-  // Se reemplaza el objeto completo en la misma posición del array (misma
-  // idea que en CREATE), en vez de ir pisando propiedad por propiedad.
-  platosColombia[indice] = {
-    nombre: datos.get("nombre").trim(),
-    region: datos.get("region").trim(),
-    tiempoPreparacionMin: Number(datos.get("tiempoPreparacionMin")),
-    esVegetariano: datos.get("esVegetariano") === "on",
-    descripcionBreve: datos.get("descripcionBreve").trim(),
-    saboresDominantes: datos
-      .get("saboresDominantes")
-      .split(",")
-      .map((sabor) => sabor.trim())
-      .filter((sabor) => sabor !== ""),
-  };
-
-  guardarPlatos();
-  mostrarPlatos();
-  mostrarEliminar();
-  mostrarOpcionesEditar();
+  await recargarPlatos();
 });
 
-mostrarOpcionesEditar();
-cargarPlatoEnFormulario();
+recargarPlatos();
 
 // PLAYERS: solo lectura. game.js guarda la lista de jugadores como texto JSON
 // en localStorage (clave "usuariosJuego"); acá se lee con JSON.parse y se

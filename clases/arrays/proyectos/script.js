@@ -1,55 +1,67 @@
 const inventarioEl = document.getElementById("inventario");
 const plantillaPlato = document.getElementById("plato-template");
 
-// Aquí pasa el renderizado real: por cada plato del array clonamos la
-// plantilla del HTML (el <template>, que no se ve en pantalla) y llenamos
+// Aquí pasa el renderizado real: por cada plato que llega de Supabase clonamos
+// la plantilla del HTML (el <template>, que no se ve en pantalla) y llenamos
 // sus huecos (.js-*) con los datos de ese plato. El HTML nunca tiene
 // tarjetas escritas a mano — todas nacen de este bucle.
-// platosColombia e imagenesConocidas viven en data.js, que se carga antes.
-platosColombia.forEach((plato) => {
-  const carta = plantillaPlato.content.cloneNode(true);
+// listarPlatos() viene de js/crudPlatos.js; es async porque la consulta viaja
+// por internet, así que todo el pintado espera (await) a que lleguen los datos.
+async function cargarVitrina() {
+  const platos = await listarPlatos();
+  if (!platos) {
+    inventarioEl.textContent = "No se pudieron cargar los platos. Revisa la consola.";
+    return;
+  }
 
-  carta.querySelector(".js-nombre").textContent = plato.nombre;
-  // El nombre se repite en la cara de atrás como título, para que al girar
-  // la tarjeta se sepa de qué plato son los datos.
-  carta.querySelector(".js-nombre-back").textContent = plato.nombre;
+  platos.forEach((plato) => {
+    const carta = plantillaPlato.content.cloneNode(true);
 
-  // Región y tipo de plato ahora viven en la cara de atrás. El booleano
-  // esVegetariano decide tres cosas a la vez: el texto, el ícono (hoja o
-  // presa de carne) y el color del círculo (azul = vegetariano, rojo = con
-  // carne), así el dato no solo se lee, también se ve.
-  carta.querySelector(".js-region").textContent = plato.region;
-  carta.querySelector(".js-dieta").textContent =
-    plato.esVegetariano ? "Vegetariano" : "Contiene carne";
-  // Se usa toggleAttribute y no la propiedad .hidden porque los <svg> no
-  // tienen esa propiedad (es solo de elementos HTML): asignarla no haría nada.
-  carta.querySelector(".js-icono-veg").toggleAttribute("hidden", !plato.esVegetariano);
-  carta.querySelector(".js-icono-carne").toggleAttribute("hidden", plato.esVegetariano);
-  carta.querySelector(".js-dieta-item").classList.toggle("food-hover-item--carne", !plato.esVegetariano);
+    carta.querySelector(".js-nombre").textContent = plato.nombre;
+    // El nombre se repite en la cara de atrás como título, para que al girar
+    // la tarjeta se sepa de qué plato son los datos.
+    carta.querySelector(".js-nombre-back").textContent = plato.nombre;
 
-  // La foto se busca por nombre en imagenesConocidas; el alt describe la
-  // imagen para lectores de pantalla y aparece si la foto no llega a cargar.
-  const imagenEl = carta.querySelector(".js-imagen");
-  imagenEl.alt = plato.nombre;
-  imagenEl.src = imagenesConocidas[plato.nombre];
+    // Región y tipo de plato ahora viven en la cara de atrás. El booleano
+    // esVegetariano decide tres cosas a la vez: el texto, el ícono (hoja o
+    // presa de carne) y el color del círculo (azul = vegetariano, rojo = con
+    // carne), así el dato no solo se lee, también se ve.
+    carta.querySelector(".js-region").textContent = plato.region;
+    carta.querySelector(".js-dieta").textContent =
+      plato.esVegetariano ? "Vegetariano" : "Contiene carne";
+    // Se usa toggleAttribute y no la propiedad .hidden porque los <svg> no
+    // tienen esa propiedad (es solo de elementos HTML): asignarla no haría nada.
+    carta.querySelector(".js-icono-veg").toggleAttribute("hidden", !plato.esVegetariano);
+    carta.querySelector(".js-icono-carne").toggleAttribute("hidden", plato.esVegetariano);
+    carta.querySelector(".js-dieta-item").classList.toggle("food-hover-item--carne", !plato.esVegetariano);
 
-  // Tiempo y sabores también van en la cara de atrás (visible al girar la
-  // tarjeta con el hover), en elementos aparte de los del frente.
-  carta.querySelector(".js-tiempo").textContent = `${plato.tiempoPreparacionMin} min`;
-  carta.querySelector(".js-sabores").textContent = plato.saboresDominantes.join(", ");
+    // La foto se busca por nombre en la columna imagen de la tabla; el alt describe la
+    // imagen para lectores de pantalla y aparece si la foto no llega a cargar.
+    const imagenEl = carta.querySelector(".js-imagen");
+    imagenEl.alt = plato.nombre;
+    imagenEl.src = plato.imagen;
 
-  carta.querySelector(".js-descripcion").textContent = plato.descripcionBreve;
+    // Tiempo y sabores también van en la cara de atrás (visible al girar la
+    // tarjeta con el hover), en elementos aparte de los del frente.
+    carta.querySelector(".js-tiempo").textContent = `${plato.tiempoPreparacionMin} min`;
+    carta.querySelector(".js-sabores").textContent = plato.saboresDominantes.join(", ");
 
-  // El clic para abrir el modal va en .food-card (la tarjeta completa), no en
-  // un elemento suelto: así cualquier parte de la tarjeta (frente o dorso)
-  // responde igual. Se agrega acá, antes del appendChild, porque "plato" solo
-  // existe dentro de esta vuelta del forEach — es el cierre (closure) el que
-  // permite que el listener recuerde a qué plato exacto corresponde esta
-  // tarjeta cuando se haga clic, más adelante en el tiempo.
-  carta.querySelector(".food-card").addEventListener("click", () => abrirModal(plato));
+    carta.querySelector(".js-descripcion").textContent = plato.descripcionBreve;
 
-  inventarioEl.appendChild(carta);
-});
+    // El clic para abrir el modal va en .food-card (la tarjeta completa), no en
+    // un elemento suelto: así cualquier parte de la tarjeta (frente o dorso)
+    // responde igual. Se agrega acá, antes del appendChild, porque "plato" solo
+    // existe dentro de esta vuelta del forEach — es el cierre (closure) el que
+    // permite que el listener recuerde a qué plato exacto corresponde esta
+    // tarjeta cuando se haga clic, más adelante en el tiempo.
+    carta.querySelector(".food-card").addEventListener("click", () => abrirModal(plato));
+
+    inventarioEl.appendChild(carta);
+  });
+}
+
+cargarVitrina();
+
 
 // ----- Modal de detalle -----
 const modal = document.getElementById("modal-plato");
@@ -65,7 +77,7 @@ function abrirModal(plato) {
   document.getElementById("modal-descripcion").textContent = plato.descripcionBreve;
 
   const modalImagen = document.getElementById("modal-imagen");
-  modalImagen.src = imagenesConocidas[plato.nombre];
+  modalImagen.src = plato.imagen;
   modalImagen.alt = plato.nombre;
 
   // Sacar el atributo hidden es lo que realmente muestra el modal; el CSS
